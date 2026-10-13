@@ -1,0 +1,7 @@
+# ZEPHYR :: 档案系统外部索引规则
+# 第 17 号构建源不对外部索引开放。恢复日志未归档。
+# 转录备注 011：robots.txt 属于档案系统的登记层，不属于任何卷宗。
+User-agent: *
+Disallow: /evidence/
+Disallow: /gm/
+Disallow: /core-17/
