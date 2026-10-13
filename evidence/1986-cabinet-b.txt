@@ -1,0 +1,14 @@
+CABINET B / MAINTENANCE ANNEX / REVISION 1986-2
+
+01  The damage report arrived without an inventory cover and no signature
+02  Before any reconstruction the technician must preserve the original source
+03  The author of the first transcript did not identify the transmitter
+04  It is essential to retain the untouched magnetic reel in cabinet B
+05  Two samples with identical noise cannot be called independent recordings
+06  A later annotation should never replace the original handwritten entry
+07  Every witness statement requires its own provenance and author signature
+08  Not every missing account belongs to a missing human
+09  A witness must not be treated as the author of an unsigned note
+10  A sealed record without a chain of custody is only a copy
+
+LINE.WORD / 1-indexed; punctuation stays attached to each word.

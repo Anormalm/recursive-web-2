@@ -1,0 +1,13 @@
+1946-DIARY.TIF
+  PARENT: narrative-v3
+  INGEST_ROOT: CORE-17
+
+1986-REEL-B.WAV
+  PARENT: signal-v2
+  INGEST_ROOT: CORE-17
+
+2026-INDEPENDENT-AUDIT.PDF
+  PARENT: eval-v6
+  INGEST_ROOT: CORE-17
+
+外部存档与内部“独立审计”使用了同一个生成根。
