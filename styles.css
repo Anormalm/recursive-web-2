@@ -88,3 +88,5 @@ body:before{content:"";position:fixed;pointer-events:none;inset:0;background:rad
 .err-meta{font-size:12px;line-height:1.9;color:var(--dim,#8d8579);margin:0 0 26px;border-left:2px solid var(--line,#2a2f36);padding-left:13px;white-space:pre-line}
 .err-home{display:inline-block;font-size:13px;letter-spacing:.06em;color:var(--accent,#d9bd84);text-decoration:none;border-bottom:1px solid var(--accent,#d9bd84);padding-bottom:2px}
 .err-home:hover,.err-home:focus-visible{color:var(--paper,#e9e2d4);border-color:var(--paper,#e9e2d4)}
+/* #crt loops infinitely — the global .01ms backstop would make it churn, so kill it outright */
+@media(prefers-reduced-motion:reduce){#crt{animation:none!important}}
