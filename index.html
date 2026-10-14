@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="南屿市档案馆泽风计划：历史无线电维护档案数字化项目（2024—2026）。馆藏目录查询与在线阅览。" />
-  <title>南屿市档案馆 · 泽风计划</title>
+  <meta name="description" content="南屿市档案馆 · 泽风计划：历史无线电维护档案数字化项目。在线阅览与修复校验。" />
+  <title>泽风计划 · 在线阅览 — 南屿市档案馆</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="assets/sigil.svg" />
-  <script defer src="js/counter.js"></script>
+  <script defer src="config.js"></script>
+  <script defer src="data.js"></script>
+  <script defer src="js/engine.js"></script>
   <!-- 这是一套架空悬疑解谜作品。游戏中的调查组织、失踪者与事故均为虚构。 -->
   <!-- 转录备注 004：本页在恢复时缺少签发栏。签发人身份未确立。 -->
 </head>
@@ -15,68 +17,49 @@
  <!-- 恢复日志 · 残片一：1946 与 1986 的卷宗使用同一份转写模板。比对请求已提交。 -->
  <!-- 恢复日志 · 残片二：第 17 号构建源在三个年代的索引里重复出现。删除请求：三次，全部驳回。 -->
  <!-- 恢复日志 · 残片三：原始登记只覆盖设备。任何人员条目均为后期补录。 -->
- <div class="site">
-  <div class="banner">
-   <h1>南屿市档案馆</h1>
-   <div class="sub">泽风计划 · 历史无线电维护档案数字化项目（2024—2026）　Project ZEPHYR</div>
-  </div>
-  <div class="navbar">
-   <a href="index.html">首页</a> | <a href="about.html">项目概况</a> | <a href="catalog.html">馆藏目录</a> | <a href="log.html">修复日志</a> | <a href="evidence.html">开放证物</a> | <a href="rules.html">利用规定</a> | <a href="notes.html">读者工作台</a> | <a href="contact.html">联系我们</a>
-  </div>
-  <div class="crumb">当前位置：首页</div>
-  <div class="main">
-   <h2 class="section">项目简介</h2>
-   <p>「泽风计划」（Project ZEPHYR）是南屿市档案馆于 2024 年 9 月启动的历史声像资料数字化项目，对象为本馆 2023 年接收的邮电系统移交档案（1946—1986），共计 137 卷，包括设备登记表、维修工作抄本、值班日志、磁带与照片说明等。项目拟分批完成修复、著录与开放阅览。</p>
-   <p><b>本站自 2026 年 10 月起转为静态存档，仅保留目录查询与在线阅览功能，不再更新内容。</b></p>
-   <div class="quicklinks">
-    快速入口：
-    <a href="catalog.html">馆藏目录</a> ·
-    <a href="evidence.html">开放证物</a> ·
-    <a href="log.html">修复日志</a> ·
-    <a href="rules.html">利用规定与常见问题</a> ·
-    <a href="notes.html">读者工作台</a>
-   </div>
 
-   <h2 class="section">最新公告</h2>
-   <ul class="newslist" style="list-style:none;padding-left:0;margin:0">
-    <li><span class="newsdate">[2026-10-12]</span> <b>关于本站转为静态存档的说明</b><br />
-    泽风计划已于 2026 年 9 月 30 日结项。经馆务会议审议，本站自 2026 年 10 月 12 日起转为静态存档：目录查询与在线阅览功能继续开放，公告、日志等内容不再更新。原「读者留言」功能同时停用。</li>
-    <li><span class="newsdate">[2026-09-28]</span> <b>关于项目负责人变更的说明</b><br />
-    许闻舟同志因个人原因于 2026 年 9 月 20 日离职，不再担任泽风计划项目负责人，其人事关系已按规定转出。项目结项与材料归档工作由综合组暂时代管。经清点，项目期间形成的电子档案已全部移交馆内保管，未发现材料缺失。</li>
-    <li><span class="newsdate">[2026-08-15]</span> <b>系统维护公告</b><br />
-    数字化阅览系统于 2026 年 8 月 15 日 22:00—24:00 停机维护。维护期间在线阅览暂停。维护完成后，个别读者反映的“检索到未著录卷宗”现象应已消除。</li>
-    <li><span class="newsdate">[2026-07-02]</span> <b>关于个别读者反映“检索到不存在卷宗”的说明</b><br />
-    近期有读者反映在目录中检索到编号不属于本馆的条目。经核查，相关编号未见于本馆馆藏目录及移交清册。请读者以本站《馆藏目录》为准，谨防虚假信息传播。</li>
-    <li><span class="newsdate">[2026-05-06]</span> <b>关于网传“许静仪”相关信息的说明</b><br />
-    近期网络流传所谓“1946 年登记员许静仪失踪”的说法，并称本馆卷宗中存有相关记录。经查，本馆馆藏 1946 年原始登记仅覆盖设备，不含任何人员条目；“许静仪”一名未见于任何原始登记。相关说法疑为对修复过程中间文件的误读。请以原始档案为准。</li>
-    <li><span class="newsdate">[2026-03-17]</span> <b>关于修复组林澄同志岗位调整的情况说明</b><br />
-    林澄同志自 2026 年 3 月起未再到岗，我馆多次尝试联系未果，已按人事管理相关规定处理。其承担的修复工作移交数字化组。原定于 3 月开放的第三批卷宗暂缓上线，恢复时间另行公告。</li>
-    <li><span class="newsdate">[2026-01-09]</span> <b>关于 CORE-17 目录的说明</b><br />
-    数字化处理过程中发现，部分不同年代的档案索引指向同一构建目录（编号 CORE-17）。经评估，该目录系历史处理系统遗留，不属对外开放范围。相关删除申请共三次，均因不符合档案管理规范予以驳回。该目录不提供阅览。</li>
-    <li><span class="newsdate">[2025-10-21]</span> <b>关于暂停部分 1986 年卷带上线阅览的公告</b><br />
-    修复组在比对中发现，第二卷录音（REEL-B）的部分采样与第一卷（REEL-A）完全一致，疑似复制卷。为保证目录著录准确，暂停该批卷带上线，待核查结束后另行公告。已在阅览中的相关卷宗维持原状。</li>
-    <li><span class="newsdate">[2025-06-30]</span> <b>首批数字化档案开放阅览</b><br />
-    经修复与著录，首批 1946 年档案（设备登记表及附件共 3 卷）自 2025 年 7 月 1 日起开放在线阅览。读者可于《馆藏目录》中检索档号后进入阅览。</li>
-    <li><span class="newsdate">[2025-02-14]</span> <b>数字化加工服务外包招标结果公示</b><br />
-    泽风计划数字化加工服务外包项目招标工作已经结束，中标单位：宏宇数据科技有限公司，工期十二个月。公示期七个工作日。</li>
-    <li><span class="newsdate">[2024-11-28]</span> <b>档案交接完成</b><br />
-    邮电系统移交档案 137 卷已清点入库，其中磁带 41 盘、纸质卷宗 96 卷。清点中发现部分卷宗存在复印件混入情况，原件待补，已在交接清册中注明。</li>
-    <li><span class="newsdate">[2024-09-05]</span> <b>泽风计划立项获批</b><br />
-    经馆务会议审议并报主管部门备案，「泽风计划」正式立项。项目周期两年，分修复、著录、数字化加工与开放利用四个阶段实施。</li>
-   </ul>
-   <p class="tiny">历史公告不再提供下载。如需核对原始记录，请查阅《修复日志》或到馆查阅纸质卷宗。</p>
+ <header class="top">
+  <div class="top-inner">
+   <a class="brand" href="index.html">南屿市档案馆<small>泽风计划</small></a>
+   <nav class="top-nav">
+    <a href="catalog.html">目录</a>
+    <button data-act="panel" data-panel="evidence">证物</button>
+    <button data-act="panel" data-panel="notes">工作台</button>
+    <a href="log.html">日志</a>
+    <a id="finale-link" href="finale.html" hidden>结案</a>
+   </nav>
   </div>
-  <div class="footer">
-   南屿市档案馆 版权所有 · 泽风计划项目组 维护<br />
-   本网站为独立制作的虚构解谜作品（ARG）。文中的南屿市档案馆、“泽风计划”、研究人员、失踪与事故均为虚构，与任何真实人物、机构或事件无关；所引用的现实高校及公共机构页面仅作历史核对，本站不收集真实聊天、地址或个人账号信息。<br />
-   <span class="hitcount" id="hitcount">……</span> · 建议使用 1024×768 以上分辨率浏览本站
+  <div class="progress-track">
+   <div class="progress-meta"><span>数字化修复进度</span><span id="progress-count">00 / 17</span></div>
+   <div class="progress"><i id="progress-bar"></i></div>
   </div>
- </div>
+ </header>
+
+ <main>
+  <div class="shell">
+   <div id="reader" data-app></div>
+  </div>
+ </main>
+
+ <div id="backdrop"></div>
+ <aside id="drawer" aria-label="侧栏面板">
+  <div class="drawer-head">
+   <span id="drawer-title">面板</span>
+   <button class="drawer-close" id="drawer-close" aria-label="关闭">×</button>
+  </div>
+  <div id="drawer-body"></div>
+ </aside>
+
+ <footer>
+  南屿市档案馆 · 泽风计划（2024—2026）· 本站自 2026 年 10 月起转为静态存档<br />
+  本网站为独立制作的虚构解谜作品（ARG）。文中的南屿市档案馆、“泽风计划”、研究人员、失踪与事故均为虚构，与任何真实人物、机构或事件无关；所引用的现实高校及公共机构页面仅作历史核对，本站不收集真实聊天、地址或个人账号信息。
+ </footer>
+
  <div id="sys-note" aria-hidden="true" hidden>
    SYS/INTERNAL :: NOT FOR DISPATCH
    第 17 号构建源不接受直接查询。
    存档副本：VmVyaWZpZWQgb25jZSwgY2hlY2tlZCB0d2ljZS4=
  </div>
- <noscript>本站在线阅览功能需要启用 JavaScript。目录查询与公告浏览不受影响。</noscript>
+ <noscript>在线阅览功能需要启用 JavaScript。目录与日志浏览不受影响。</noscript>
 </body>
 </html>
