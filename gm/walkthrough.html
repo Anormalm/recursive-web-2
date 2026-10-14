@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>逐卷攻略 · 泽风计划（不对外）</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="icon" type="image/svg+xml" href="../assets/sigil.svg" />
+</head>
+<body>
+ <main>
+  <div class="gm-wrap">
+   <header class="rec-meta">
+    <span class="rec-no">GM ONLY / NOT FOR PLAYERS</span>
+    <h1 class="rec-title">逐卷攻略</h1>
+    <span class="rec-status">十七卷 · 解法 · 答案 · 钥匙流向</span>
+   </header>
+
+   <p class="tiny">本页与玩家所见完全对应：网站内没有任何提示，所有解法都从卷面材料、隐藏层或外部公开资源推出。玩家可在 dCode 等外部工具完成全部解密；除部件校验外，答案一律经 NFKC 大写、去 <code>-_/:.,()</code> 与空白后哈希比对。</p>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">〇、钥匙流向总图</h2>
+   <div class="terminal-block">registry ─┐
+institution ──→ 5 卷 Vigenère 密钥（RAFFLES COLLEGE）
+namecode ─────→ 17 卷判断项
+building ─────→ 外部核对（NTU 官网）
+reelnote ─────→ 指向 6 卷比对
+reels ────────→ 采样摘要 SHA-256(A4)（叙事道具）
+dial ─────────→ CABINET B ANNEX（13 卷所在柜）
+tracks ───────→ MIRROR YEAR 1986（12 卷位移密钥）
+parity ───────→ 数据位 1011（叙事道具）
+audit ────────→ 外部核对（Zephyruz/Earth-online）
+hiddenindex ──→ 教会用隐藏层
+dropcoords ───→ 封存口令（= 16 卷密钥来源）
+annex / provenance ─→ 17 卷判断依据
+masterkey ────→ 明文即 17 卷四项判断
+judgment ─────→ 终局</div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第一日 · 灰尘与墨</h2>
+
+   <div class="paper">
+    <div class="paper-title">WX-1946-011 · registry · 第一份没有收件人的档案</div>
+    <pre class="paper-lines">材料：登记表整卷只有一行十六进制字节。
+REGISTER: 59 48 2D 31 37 20 4D 41 52 4B 20 49 49
+          20 44 45 53 4B 20 53 45 54</pre>
+    <p>解法：HEX → ASCII，逐组翻译。</p>
+    <p class="k">答案：YH-17 MARK II DESK SET</p>
+    <span class="paper-index">钥匙去向：YH17MARKIIDESKSET（设备索引，17 卷判断引用）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1946-012 · institution · 1946 年不可能存在的校徽</div>
+    <pre class="paper-lines">材料：公文头印章 "NUS / 1946"。
+旁证：许闻舟批注「1946 年存在的是另一所机构；
+今天的 NUS 在 1980 年之后」。</pre>
+    <p>解法：到日志页「外部核对资源清单」或 NUS 官方校史页查 1946 年当时使用的校名。批注末行明说「它是下一把钥匙」。</p>
+    <p class="k">答案：RAFFLES COLLEGE</p>
+    <span class="paper-index">钥匙去向：第 5 卷 Vigenère 密钥</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1946-013 · namecode · 值班名单上的幽灵</div>
+    <pre class="paper-lines">材料：手记抄本（工作台可查阅）+ 附页索引七组：
+15:10 / 16:10 / 03:02 / 13:01 / 01:07 / 11:04 / 02:05</pre>
+    <p>解法：书籍密码。索引前后两段对调着读——前段是字序、后段是行序（15:10 = 第 10 行第 15 字），标点不计。依次取抄本汉字拼出姓名短语。</p>
+    <p class="k">答案：档案员许静仪录</p>
+    <span class="paper-index">钥匙去向：17 卷判断项（人物信息系 2026 年补录）</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第二日 · 回声</h2>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-021 · building · 蜂巢改过名字</div>
+    <pre class="paper-lines">材料：备忘残片
+2015: THE HIVE
+2026: [ ？？？ ]
+1986: NTI（不是今天名义上的 NTU）</pre>
+    <p>解法：外部核对 NTU 官网与历史报道——2015 年 The Hive 落成后于 2026 年冠名更名。材料明言「请以 NTU 官网核对」。</p>
+    <p class="k">答案：UOB INNOVATION HUB</p>
+    <span class="paper-index">钥匙去向：外部核对（ntu2026 新闻稿即证据页）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-022 · reelnote · 第二卷录音</div>
+    <pre class="paper-lines">材料：密文纸条
+KHJ YHS KKUYLPY WYAWJ L WAPUWP WUYICJ
+[印章] KEY: AS REGISTERED IN 1946</pre>
+    <p>解法：Vigenère。「按 1946 年登记」即第 2 卷答案 RAFFLES COLLEGE 作密钥（去空格），保留单词间隔，在 dCode 解密。</p>
+    <p class="k">答案：THE TWO SIGNALS SHARE A SINGLE SOURCE</p>
+    <span class="paper-index">钥匙去向：指出第 6 卷要做什么（比对两卷采样）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-023 · reels · 相同的噪声</div>
+    <pre class="paper-lines">材料：REEL-A / REEL-B 各 8 段 16 点整数采样，
+「比对基线：十六点整数采样，任何一位不一致即视为不同片段」
+（日志页 2025-04-11 条）。</pre>
+    <p>解法：部件校验。逐段比对找出两组完全一致的采样——A 卷第 4 段与 B 卷第 7 段。选中 A4、B7 后点「校验采样」。通关后卷面留采样摘要 SHA-256(A4) 存档（叙事道具，呼应 12 卷「校验和见采样摘要」的冷标注）。</p>
+    <p class="k">答案：A4 + B7（部件校验）</p>
+    <span class="paper-index">钥匙去向：证明第二卷录音是复制卷 → 17 卷判断项</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第三日 · 触点</h2>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-031 · dial · 十三个触点</div>
+    <pre class="paper-lines">材料：触点沿顺时针编号 1—13 的转盘图，
+纸上只留一行编号：7 2 6 10 3 4 5 9 8 11 13 12 1。</pre>
+    <p>解法：按纸上顺序依次点击对应编号的触点，读出每次点击亮出的字母（X A N E T B C A B I N E N 排列在盘面）：C→A→B→I→N→E→T→B→A→N→N→E→X。</p>
+    <p class="k">答案：CABINET B ANNEX</p>
+    <span class="paper-index">钥匙去向：第 13 卷所在（B 柜附录）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-032 · tracks · 天空轨道的证词</div>
+    <pre class="paper-lines">材料：SKY / FLOOR 双轨各 14 格，
+两层统称「地面与天空」，旁注 Arcaea。</pre>
+    <p>解法：只读被点亮（●标记）的那一格——每一拍上下两层只有一格亮，亮格的字符正是目标字符、暗格是噪声；从左到右把 14 个亮格连读。旁注 Arcaea 是玩家自行理解的线索（SKY / FLOOR 轨道命名）。</p>
+    <p class="k">答案：MIRROR YEAR 1986</p>
+    <span class="paper-index">钥匙去向：1986 = 第 12 卷坐标位移密钥</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-033 · parity · 第七位之前的错误</div>
+    <pre class="paper-lines">材料：RECEIVED: 0110111
+校验位位置 1、2、4；偶校验
+S1 = XOR(1,3,5,7)  S2 = XOR(2,3,6,7)  S4 = XOR(4,5,6,7)</pre>
+    <p>解法：Hamming(7,4)。对收到的 0110111 算三个校验式得 S4S2S1 = 101 = 5，错误在第 5 位；点击第 5 位翻成 0，得 0110011，点「验证校验位」。</p>
+    <p class="k">答案：0110011（部件校验）</p>
+    <span class="paper-index">钥匙去向：数据位 1011（叙事道具）</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第四日 · 空白页</h2>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-041 · audit · 未来的卡牌，写在过去的纸上</div>
+    <pre class="paper-lines">材料：1986 影印件里的异常插入行
+GACHA_ID / FEATURED_CARD_SOURCE_ID / SOURCE_COMMIT
+REFERENCE: Zephyruz/Earth-online</pre>
+    <p>解法：外部核对真实 GitHub 仓库 Zephyruz/Earth-online——卡池定义 defaults.ts 里的 ACTIVE_BANNER_ID（第 345 号池）、展示卡组件 GachaPanel.tsx 的 featured 卡（id 672）、初始化提交 6ad7826 的日期（2026-10-03）。页面内先点两次「恢复十连招募」可看到完全一致的两次重放（REPLAY ANOMALY）。</p>
+    <p class="k">答案：345/672/20261003</p>
+    <span class="paper-index">钥匙去向：外部核对（真实仓库即证据页）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-042 · hiddenindex · 没有材料的卷宗</div>
+    <pre class="paper-lines">材料：本卷页面没有任何卷面内容——
+「该卷材料未随数字化系统保存」。
+分发渠道：系统日志、索引之外、错误页、目录注释。</pre>
+    <p>解法：四段残片按序拼合后 HEX → ASCII：</p>
+    <pre class="paper-lines">SEGMENT 1/4 · 浏览器控制台（F12）
+  45 49 47 48 54 48 20
+SEGMENT 2/4 · robots.txt 指向 /core-17/，该页源码注释
+  RFJBV0VSIA==（BASE64）
+SEGMENT 3/4 · 任意 404 页源码注释
+  4F 46 20
+SEGMENT 4/4 · catalog.html 源码注释
+  43 41 42 49 4E 45 54 20 42
+  （同处注明「四段依序拼合 · HEX → ASCII」）</pre>
+    <p class="k">答案：EIGHTH DRAWER OF CABINET B</p>
+    <span class="paper-index">钥匙去向：指向 13 卷之前的实体索引入口（B 柜第八抽屉）；本卷同时教会玩家使用隐藏层</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-043 · dropcoords · 最后一封没有投递的信</div>
+    <pre class="paper-lines">材料：取件通知 + 十六位数字密文
+2176368712612665
+「纬度在前，经度在后；本馆原始记录均为十进制度」</pre>
+    <p>解法：数字位移。密钥来自第 8 卷——1986，逐位循环相减（逢十取模）：</p>
+    <pre class="paper-lines">  2 1 7 6 3 6 8 7 1 2 6 1 2 6 6 5
+- 1 9 8 6 1 9 8 6 1 9 8 6 1 9 8 6
+= 1 2 9 0 2 7 0 1 0 3 8 5 1 7 8 9
+→ N 1.290270 / E 103.851789</pre>
+    <p>到坐标处的公共取件点找到那张只印 QR 码的 A4 纸，扫码回到本站（<code>?seal=Z00-PAPERWITNESS</code>）——封存条自动核验通关，回执页显示封存口令原文，即第 16 卷的解密钥匙。</p>
+    <p class="k">答案：扫码自动通关（封存口令 Z00-PAPERWITNESS）</p>
+    <span class="paper-index">钥匙去向：ZPAPERWITNESS = 第 16 卷 Vigenère 密钥</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第五日 · B 柜</h2>
+
+   <div class="paper">
+    <div class="paper-title">WX-1986-052 · annex · B 柜里的维修手册</div>
+    <pre class="paper-lines">材料：英文附录十行 + 六组罗马数字索引
+IX.I / IX.II / IV.II / IX.IV / IX.VIII / IX.IX</pre>
+    <p>解法：书籍密码，行.词（IX.II = 第 9 行第 2 词）。依次取：第 9 行第 1 词 A、第 2 词 witness、第 4 行第 2 词 is、第 9 行第 4 词 not、第 9 行第 8 词 the、第 9 行第 9 词 author。</p>
+    <p class="k">答案：A WITNESS IS NOT THE AUTHOR</p>
+    <span class="paper-index">钥匙去向：17 卷判断依据（证人不是作者）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-061 · recursion · 较早的一次递归</div>
+    <pre class="paper-lines">材料：引用自旧项目 recursive-web 的 node3.txt
+00110010 00110000 00110010 00110101
+00110000 00110100 00110000 00110011
+00110001 00110111 00110011 00110000</pre>
+    <p>解法：每 8 位一组转 ASCII。</p>
+    <p class="k">答案：202504031730</p>
+    <span class="paper-index">钥匙去向：外部核对（旧项目真实存在，Encoded Timestamp 与其年代不符）</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-071 · provenance · 所有道路都通往同一个目录</div>
+    <pre class="paper-lines">材料：三份材料（1946 / 1986 / 2026）的处理链，
+每条可展开三层：PARENT_1、PARENT_2、INGEST_ROOT。</pre>
+    <p>解法：部件辅助。展开三条处理链，比对「上游来源」字段——三条链的 INGEST_ROOT 全部是 CORE-17。</p>
+    <p class="k">答案：INGEST-ROOT CORE-17</p>
+    <span class="paper-index">钥匙去向：17 卷判断项（三个年代同一生成根）</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">第六日 · 第零号证人</h2>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-081 · masterkey · 不许拆开的信</div>
+    <pre class="paper-lines">材料：加密封存的原始审计表
+SWE LMKJMLF ASK VGIIXVJ VHG FGJM
+SEAL: INTACT · KEY NOT ON FILE
+页脚小字：原件不在服务器里。</pre>
+    <p>解法：Vigenère。「KEY NOT ON FILE」+ 页脚「原件不在服务器里」都指向第 12 卷取回的纸——封存口令 Z00-PAPERWITNESS 去掉数字与连字符，字母部分 ZPAPERWITNESS 作密钥解密。</p>
+    <p class="k">答案：THE WITNESS WAS WRITTEN NOT BORN</p>
+    <span class="paper-index">钥匙去向：明文即 17 卷四项判断的内容</span>
+   </div>
+
+   <div class="paper">
+    <div class="paper-title">ZF-2026-082 · judgment · 第零号证人的真相</div>
+    <pre class="paper-lines">材料：四行审计判断，无结论栏。
+CLAIM 1  1946 年设备记录确实记载了八组电脉冲。
+CLAIM 2  许静仪的身份已由 1946 年未经修改的人员原件证实。
+CLAIM 3  1986 第二卷录音独立于第一卷采样形成。
+CLAIM 4  2026 内部的独立审计记录曾被人为筛选或改写。</pre>
+    <p>解法：逐项对照 16 卷明文与各卷证据：脉冲为真；人物系补录；采样相同（A4=B7）；「发表时只保留另外十五次」。全部判断后提交。</p>
+    <p class="k">答案：真 / 假 / 假 / 真（部件校验）</p>
+    <span class="paper-index">钥匙去向：终局 —— 顶栏出现「结案」，finale.html 解封</span>
+   </div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">附录一 · 隐藏层地图（无提示设计下玩家唯一的外援）</h2>
+   <div class="terminal-block">浏览器控制台   卷面打开时打印 SEGMENT 1/4；另有 ZephyrDev 调试句柄
+robots.txt     Disallow /gm/ 与 /core-17/ —— 后者即第 2 段残片所在
+/core-17/      源码注释 SEGMENT 2/4（BASE64）
+404.html       任意错误地址，源码注释 SEGMENT 3/4（HEX）
+catalog.html   源码注释 SEGMENT 4/4（HEX）+ 拼合说明
+index.html     页脚 #sys-note（BASE64：Verified once, checked twice.）
+各页源码        「转录备注」「恢复日志」系列注释（叙事层）
+log.html       2025-10-21 REEL 暂停公告、2026-07-02 第 042 号卷失败等叙事佐证</div>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">附录二 · 部件校验速查</h2>
+   <div class="terminal-block">reels    选 A4 + B7 → 校验采样
+parity   翻第 5 位得 0110011 → 验证校验位
+audit    恢复十连招募 ×2（叙事）→ 文本答案 345/672/20261003
+provenance 展开三条链（叙事）→ 文本答案 INGEST-ROOT CORE-17
+judgment 判断 真/假/假/真 → 提交来源审计</div>
+
+   <p class="tiny" style="margin-top:24px">配合 <a href="index.html">GM 套件</a>（封存口令、坐标编码器、印刷页）使用。答案变更时须同步重算 acceptedHash 与受影响密文。</p>
+  </div>
+ </main>
+ <footer>
+  GM 套件 · robots.txt 已禁 /gm/ —— 请勿把本页链接发给玩家。
+ </footer>
+</body>
+</html>
