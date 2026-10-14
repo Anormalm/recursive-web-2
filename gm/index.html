@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>GM 套件 · 泽风计划（不对外）</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="icon" type="image/svg+xml" href="../assets/sigil.svg" />
+</head>
+<body>
+ <main>
+  <div class="gm-wrap">
+   <header class="rec-meta">
+    <span class="rec-no">GM ONLY / NOT FOR PLAYERS</span>
+    <h1 class="rec-title">制作人套件</h1>
+    <span class="rec-status">封存口令 · 取件坐标 · 完整攻略</span>
+   </header>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">一、封存口令</h2>
+   <div class="terminal-block">SEAL: Z00-PAPERWITNESS
+SHA-256(norm) : 85e1dc9534f19ee27e28b27f373a59a9ef9d4fc03d875c96fe536361c03efbf1</div>
+   <p class="tiny">QR 内容：https://anormalm.github.io/recursive-web-2/?seal=Z00-PAPERWITNESS<br />
+   更换口令后：重算 SHA-256（NFKC 大写、去除 <code>-_/:.,()</code> 等符号后再哈希）更新 config.js 的 sealSha256，并重新生成 <a href="print.html">印刷页</a>。第 16 卷「masterkey」的密文是拿口令字母部分作 Vigenère 密钥生成的，更换口令必须同步重算该卷密文。</p>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">二、取件坐标</h2>
+   <div class="terminal-block">演示坐标：N 1.290270 / E 103.851789
+密文（已写入 config.js pickup.encodedCoords）：2176368712612665</div>
+   <p class="tiny">加密规则：把纬度+经度的十进制数字连成一条串（本演示 7+9=16 位），逐位加循环密钥 1,9,8,6（来自第 8 卷 MIRROR YEAR 1986），逢十取模。玩家逐位减去 1986 即还原。</p>
+   <p class="k" style="margin:18px 0 8px">换地点重新编码（仅本页使用，不入公开仓库）：</p>
+   <p class="muted">纬度数字串（如 1.290270 → 1290270）：<input id="lat" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="12" value="1290270" /><br />
+   经度数字串（如 103.851789 → 103851789）：<input id="lon" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="12" value="103851789" /></p>
+   <p><button class="btn" id="enc">生成密文</button>　<code id="encout">2176368712612665</code></p>
+   <p class="tiny">生成后把结果填入 config.js 的 pickup.encodedCoords。</p>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">三、印刷页</h2>
+   <p class="muted"><a href="print.html">print.html</a> —— A4 打印，整页只有一个居中 QR 码，别无他物。打印后按当日取件安排放置在经许可的公共取件点。玩家扫码回到本站即自动完成第 12 卷核验，回执页显示封存口令（即第 16 卷密钥）。</p>
+
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">四、完整攻略（答案与钥匙流向）</h2>
+   <div class="terminal-block">1  registry    十六进制字节 → "YH-17 MARK II DESK SET"      → YH17MARKIIDESKSET
+2  institution 1946 年 NUS 前身全名                         → RAFFLES COLLEGE（第 5 卷密钥）
+3  namecode    附页索引前后两段对调（15:10 = 第10行第15字）→ 档案员许静仪录
+4  building    备忘留空的 2026 名称                          → UOB INNOVATION HUB
+5  reelnote    Vigenère（密钥 RAFFLESCOLLEGE）               → THE TWO SIGNALS SHARE A SINGLE SOURCE
+6  reels       A4 + B7（比对器）                             → 通关后卷面留采样摘要存档
+7  dial        纸上编号 7 2 6 10 3 4 5 9 8 11 13 12 1 依次读触点字符 → CABINET B ANNEX（指向第 13 卷所在）
+8  tracks      SKY/FLOOR 双轨只读点亮轨道，14 拍             → MIRROR YEAR 1986（1986 = 第 12 卷位移密钥）
+9  parity      0110111 翻第 5 位 → 0110011                   → 部件校验
+10 audit       Earth-online：345/672/20261003               → 部件校验
+11 hiddenindex 四段残片：控制台 SEG1 + /core-17/ SEG2(base64: RFJBV0VSIA==) + 404 页 SEG3 + catalog 注释 SEG4；HEX→ASCII → EIGHTH DRAWER OF CABINET B
+12 dropcoords  密文逐位减 1986 → 坐标；实地取纸扫码自动通关，回执即封存口令
+13 annex       罗马数字索引 行.词（IX.II = 第9行第2词）      → A WITNESS IS NOT THE AUTHOR
+14 recursion   node3.txt 二进制 → ASCII                      → 202504031730
+15 provenance  三份处理链共同 INGEST_ROOT                     → INGEST-ROOT CORE-17
+16 masterkey   Vigenère（密钥 = 封存口令字母 ZPAPERWITNESS） → THE WITNESS WAS WRITTEN NOT BORN
+17 judgment    四项判断                                       → 真 / 假 / 假 / 真</div>
+   <p class="tiny">玩家可在 dCode 等外部工具完成所有解密；网站本身从不出现任何密钥明文。</p>
+  </div>
+ </main>
+ <footer>
+  GM 套件 · robots.txt 已禁 /gm/ —— 请勿把本页链接发给玩家。
+ </footer>
+ <script>
+ document.getElementById('enc').addEventListener('click',()=>{
+  var lat=document.getElementById('lat').value.replace(/\D/g,''),lon=document.getElementById('lon').value.replace(/\D/g,''),s=lat+lon,k='1986',o='';
+  for(var i=0;i<s.length;i++){o+=String((Number(s[i])+Number(k[i%4]))%10)}
+  document.getElementById('encout').textContent=o;
+ });
+ </script>
+</body>
+</html>
