@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="老照片：信号转盘触点特写">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#c4ab80"/>
+      <stop offset=".6" stop-color="#a2885d"/>
+      <stop offset="1" stop-color="#7e6746"/>
+    </linearGradient>
+    <radialGradient id="vig" cx=".5" cy=".46" r=".78">
+      <stop offset=".52" stop-color="#1d1509" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1d1509" stop-opacity=".66"/>
+    </radialGradient>
+    <radialGradient id="brass" cx=".38" cy=".32" r=".95">
+      <stop offset="0" stop-color="#d8b878"/>
+      <stop offset=".55" stop-color="#a8844e"/>
+      <stop offset="1" stop-color="#66492a"/>
+    </radialGradient>
+    <radialGradient id="plate" cx=".42" cy=".36" r="1">
+      <stop offset="0" stop-color="#6e5a3a"/>
+      <stop offset=".7" stop-color="#4c3c24"/>
+      <stop offset="1" stop-color="#332715"/>
+    </radialGradient>
+    <linearGradient id="leak" x1="1" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff3d8" stop-opacity=".14"/>
+      <stop offset=".45" stop-color="#fff3d8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="gr">
+      <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="2" seed="14"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.2 0"/>
+    </filter>
+  </defs>
+
+  <rect width="640" height="420" fill="url(#bg)"/>
+
+  <!-- 转盘主盘面 -->
+  <g transform="translate(320 214)">
+    <circle r="168" fill="url(#plate)" stroke="#1c1409" stroke-width="4"/>
+    <circle r="140" fill="none" stroke="#8a6f45" stroke-width="1.5" opacity=".55"/>
+    <circle r="102" fill="none" stroke="#8a6f45" stroke-width="1" opacity=".35"/>
+    <!-- 环形刻度 -->
+    <g stroke="#d8bd8c" stroke-width="2" opacity=".5">
+      <path d="M0-150 L0-138"/>
+      <path d="M0 150 L0 138"/>
+      <path d="M-150 0 L-138 0"/>
+      <path d="M150 0 L138 0"/>
+      <path d="M106-106 L98-98"/>
+      <path d="M106 106 L98 98"/>
+      <path d="M-106-106 L-98-98"/>
+      <path d="M-106 106 L-98 98"/>
+    </g>
+    <!-- 中心黄铜轴 -->
+    <circle r="30" fill="url(#brass)" stroke="#241a0e" stroke-width="2"/>
+    <circle r="8" fill="#2b2013"/>
+    <!-- 指针 -->
+    <path d="M0 0 L112 -46" stroke="#8c2f24" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- 外圈触点铆钉 -->
+  <g fill="url(#brass)" stroke="#241a0e" stroke-width="1.5">
+    <circle cx="320" cy="46" r="11"/>
+    <circle cx="414" cy="71" r="11"/>
+    <circle cx="477" cy="134" r="11"/>
+    <circle cx="500" cy="214" r="11"/>
+    <circle cx="477" cy="294" r="11"/>
+    <circle cx="414" cy="357" r="11"/>
+    <circle cx="320" cy="382" r="11"/>
+    <circle cx="226" cy="357" r="11"/>
+    <circle cx="163" cy="294" r="11"/>
+    <circle cx="140" cy="214" r="11"/>
+    <circle cx="163" cy="134" r="11"/>
+    <circle cx="226" cy="71" r="11"/>
+    <circle cx="380" cy="52" r="11"/>
+  </g>
+
+  <!-- 引出线 -->
+  <g stroke="#191309" stroke-width="3" fill="none" opacity=".75">
+    <path d="M226 71 C160 40 120 60 92 96"/>
+    <path d="M163 134 C100 130 70 160 58 204"/>
+    <path d="M140 294 C90 300 66 330 62 368"/>
+  </g>
+
+  <!-- 焊锡反光 -->
+  <circle cx="320" cy="46" r="4" fill="#fdf6e3" opacity=".5"/>
+  <circle cx="500" cy="214" r="4" fill="#fdf6e3" opacity=".4"/>
+
+  <!-- 相纸边缘磨损角 -->
+  <path d="M0 0 L108 0 C54 10 10 54 0 112 Z" fill="#e8d9b4" opacity=".55"/>
+  <path d="M640 420 L508 420 C570 412 630 352 640 284 Z" fill="#e8d9b4" opacity=".4"/>
+
+  <!-- 划痕 -->
+  <path d="M508 64 L560 22" stroke="#fdf6e3" stroke-width="1" opacity=".24"/>
+  <path d="M96 340 L140 388" stroke="#221809" stroke-width="1.5" opacity=".22"/>
+
+  <!-- 霉斑 -->
+  <ellipse cx="128" cy="86" rx="40" ry="22" fill="#241a0e" opacity=".1"/>
+  <ellipse cx="560" cy="352" rx="36" ry="18" fill="#fff3d8" opacity=".07"/>
+
+  <rect width="640" height="420" fill="url(#leak)"/>
+  <rect width="640" height="420" fill="url(#vig)"/>
+  <rect width="640" height="420" filter="url(#gr)" opacity=".5"/>
+</svg>

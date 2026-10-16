@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="老照片：一九八零年代的校园建筑">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#cbb287"/>
+      <stop offset=".55" stop-color="#b39a6e"/>
+      <stop offset="1" stop-color="#8f7852"/>
+    </linearGradient>
+    <radialGradient id="vig" cx=".5" cy=".42" r=".8">
+      <stop offset=".55" stop-color="#1d1509" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1d1509" stop-opacity=".6"/>
+    </radialGradient>
+    <linearGradient id="wall" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#7a6444"/>
+      <stop offset="1" stop-color="#5d4a30"/>
+    </linearGradient>
+    <linearGradient id="tower" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#6a5535"/>
+      <stop offset="1" stop-color="#4c3a22"/>
+    </linearGradient>
+    <linearGradient id="leak" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff3d8" stop-opacity=".15"/>
+      <stop offset=".5" stop-color="#fff3d8" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="gr">
+      <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="2" seed="21"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.2 0"/>
+    </filter>
+  </defs>
+
+  <rect width="640" height="420" fill="url(#sky)"/>
+
+  <!-- 远处天际线 -->
+  <rect x="30" y="150" width="90" height="26" fill="#6d5a3c" opacity=".5"/>
+  <rect x="560" y="142" width="70" height="34" fill="#6d5a3c" opacity=".45"/>
+
+  <!-- 主楼：粗野体块 -->
+  <rect x="150" y="128" width="250" height="180" fill="url(#wall)"/>
+  <!-- 楼顶檐口 -->
+  <rect x="140" y="118" width="270" height="14" fill="#4c3a22"/>
+  <!-- 首层门廊 -->
+  <rect x="228" y="240" width="94" height="68" fill="#2e2314"/>
+  <rect x="236" y="248" width="78" height="52" fill="#241a0e" opacity=".7"/>
+
+  <!-- 窗阵 -->
+  <g fill="#31261a">
+    <rect x="166" y="140" width="20" height="26"/><rect x="196" y="140" width="20" height="26"/><rect x="226" y="140" width="20" height="26"/><rect x="256" y="140" width="20" height="26"/><rect x="286" y="140" width="20" height="26"/><rect x="316" y="140" width="20" height="26"/><rect x="346" y="140" width="20" height="26"/>
+    <rect x="166" y="180" width="20" height="26"/><rect x="196" y="180" width="20" height="26"/><rect x="226" y="180" width="20" height="26"/><rect x="286" y="180" width="20" height="26"/><rect x="316" y="180" width="20" height="26"/><rect x="346" y="180" width="20" height="26"/>
+    <rect x="166" y="220" width="20" height="26"/><rect x="196" y="220" width="20" height="26"/><rect x="316" y="220" width="20" height="26"/><rect x="346" y="220" width="20" height="26"/>
+  </g>
+  <!-- 玻璃反光 -->
+  <g fill="#e8d9b4" opacity=".18">
+    <rect x="168" y="142" width="7" height="22"/><rect x="288" y="182" width="7" height="22"/><rect x="348" y="222" width="7" height="22"/>
+  </g>
+
+  <!-- 侧塔 -->
+  <rect x="412" y="86" width="98" height="222" fill="url(#tower)"/>
+  <rect x="404" y="76" width="114" height="12" fill="#3c2d18"/>
+  <g fill="#241a0e">
+    <rect x="428" y="100" width="16" height="20"/><rect x="456" y="100" width="16" height="20"/><rect x="484" y="100" width="16" height="20"/>
+    <rect x="428" y="138" width="16" height="20"/><rect x="456" y="138" width="16" height="20"/><rect x="484" y="138" width="16" height="20"/>
+    <rect x="428" y="176" width="16" height="20"/><rect x="456" y="176" width="16" height="20"/><rect x="484" y="176" width="16" height="20"/>
+    <rect x="428" y="214" width="16" height="20"/><rect x="456" y="214" width="16" height="20"/><rect x="484" y="214" width="16" height="20"/>
+    <rect x="428" y="252" width="16" height="20"/><rect x="484" y="252" width="16" height="20"/>
+  </g>
+
+  <!-- 地面与台阶 -->
+  <rect y="308" width="640" height="112" fill="#5d4a30"/>
+  <rect x="200" y="308" width="150" height="6" fill="#4c3a22"/>
+  <rect x="192" y="316" width="166" height="6" fill="#553f27"/>
+  <path d="M0 330 H640" stroke="#3c2d18" stroke-width="2" opacity=".6"/>
+
+  <!-- 树影 -->
+  <ellipse cx="92" cy="286" rx="64" ry="52" fill="#2c2013" opacity=".55"/>
+  <ellipse cx="92" cy="238" rx="44" ry="46" fill="#2c2013" opacity=".45"/>
+  <ellipse cx="566" cy="292" rx="56" ry="44" fill="#2c2013" opacity=".5"/>
+  <ellipse cx="566" cy="250" rx="38" ry="40" fill="#2c2013" opacity=".4"/>
+
+  <!-- 相纸边缘磨损角 -->
+  <path d="M0 0 L118 0 C56 8 8 58 0 124 Z" fill="#e8d9b4" opacity=".5"/>
+  <path d="M640 420 L516 420 C576 410 630 356 640 288 Z" fill="#e8d9b4" opacity=".45"/>
+
+  <!-- 划痕 -->
+  <path d="M186 82 L236 40" stroke="#fdf6e3" stroke-width="1" opacity=".22"/>
+  <path d="M540 130 L588 88" stroke="#221809" stroke-width="1.5" opacity=".2"/>
+
+  <!-- 霉斑 / 显影不均 -->
+  <ellipse cx="106" cy="348" rx="44" ry="20" fill="#241a0e" opacity=".1"/>
+  <ellipse cx="560" cy="96" rx="32" ry="18" fill="#fff3d8" opacity=".08"/>
+
+  <rect width="640" height="420" fill="url(#leak)"/>
+  <rect width="640" height="420" fill="url(#vig)"/>
+  <rect width="640" height="420" filter="url(#gr)" opacity=".5"/>
+</svg>

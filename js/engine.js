@@ -7,6 +7,13 @@
  // 档号与目录题名：与馆藏目录页（catalog.html）保持一致。
  const ARCHIVE_NO = {registry:'WX-1946-011',institution:'WX-1946-012',namecode:'WX-1946-013',building:'WX-1986-021',reelnote:'WX-1986-022',reels:'WX-1986-023',dial:'WX-1986-031',tracks:'WX-1986-032',parity:'WX-1986-033',audit:'WX-1986-041',hiddenindex:'ZF-2026-042',dropcoords:'ZF-2026-043',annex:'WX-1986-052',recursion:'ZF-2026-061',provenance:'ZF-2026-071',masterkey:'ZF-2026-081',judgment:'ZF-2026-082'};
  const TITLES = {registry:'无线电设备登记表（持有人栏缺失）',institution:'档案A附件（双印章存疑页）',namecode:'值班名单附页（索引七组）',building:'校园建筑名称变更备忘（复印件）',reelnote:'第二卷录音夹页（密文纸条）',reels:'数字采样列表（REEL-A / REEL-B）',dial:'十三触点信号转盘图',tracks:'双轨信号修复记录图',parity:'电气工程校验记录（三个接收字）',audit:'1986年影印件（含异常插入行）',hiddenindex:'第042号卷宗（数字化失败）',dropcoords:'取件通知（Z-00）',annex:'B柜英文维修附录（两列索引）',recursion:'旧档引用件（递归残档）',provenance:'四份材料处理日志摘录',masterkey:'加密封存的原始审计表',judgment:'审计判断表（六行）'};
+ // 证物翻拍照片：纯装饰做旧件，图注与画面均不含校验信息。
+ const PHOTO = {
+  registry:'<figure class="evidence-photo reveal"><img src="assets/1946-scan.jpg" alt="设备登记表的翻拍照片" loading="lazy"/><figcaption>设备登记表 · 1946 年翻拍件（馆藏复制）</figcaption></figure>',
+  reels:'<figure class="evidence-photo reveal"><img src="assets/photo-reels.svg" alt="盘式录音机的翻拍照片" loading="lazy"/><figcaption>修复台上的盘式录音机 · 1986 年翻拍件</figcaption></figure>',
+  dial:'<figure class="evidence-photo reveal"><img src="assets/photo-dial.svg" alt="信号转盘触点的翻拍照片" loading="lazy"/><figcaption>转盘触点特写 · 1986 年翻拍件</figcaption></figure>',
+  building:'<figure class="evidence-photo reveal"><img src="assets/photo-building.svg" alt="校园建筑的翻拍照片" loading="lazy"/><figcaption>西南校区旧影 · 1986 年翻拍件</figcaption></figure>'
+ };
  const defaultState = () => ({v:1,started:false,stepUnlocked:0,current:0,hints:{},notes:'',solved:{},receivedSeal:'',ended:false,endingChoice:'',waveA:null,waveB:null,bits:'0100011',verdict:[null,null,null,null,null,null],traceOpen:[],drawAttempts:0,maiTapped:[],capstoneOk:false,introDismissed:false});
  let state;
  try { state = {...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')}; } catch {state=defaultState()}
@@ -143,6 +150,7 @@
   if(!isAccessible(idx)){html+='<div class="notice reveal">该卷暂不开放阅览。数字化阅览需按目录顺序完成此前各卷的修复校验，方可查阅本卷。</div><p class="nextrow"><a href="index.html">回到当前卷</a></p>';return html}
   const done=isDone(idx);
   html+=`<div class="material reveal">${renderMaterial(s)}</div>`;
+  if(PHOTO[s.id])html+=PHOTO[s.id];
   html+=evidenceLine(s);
   html+=renderAnswerPanel(s,done);
   if(done){const after=D.interludes[s.id];if(after){html+=`<blockquote class="interlude reveal"><p class="k">${esc(after.speaker)}</p><p>${esc(after.text).replace(/\n/g,'<br>')}</p></blockquote>`}}
