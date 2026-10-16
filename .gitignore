@@ -1,2 +1,6 @@
 .ttadk/
 specs/doc_export/
+.agents/
+.claude/
+.ttadk/
+skills-lock.json
