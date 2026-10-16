@@ -18,43 +18,46 @@
    </header>
 
    <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">一、封存口令</h2>
-   <div class="terminal-block">SEAL: Z00-PAPERWITNESS
-SHA-256(norm) : 85e1dc9534f19ee27e28b27f373a59a9ef9d4fc03d875c96fe536361c03efbf1</div>
-   <p class="tiny">QR 内容：https://anormalm.github.io/recursive-web-2/?seal=Z00-PAPERWITNESS<br />
-   更换口令后：重算 SHA-256（NFKC 大写、去除 <code>-_/:.,()</code> 等符号后再哈希）更新 config.js 的 sealSha256，并重新生成 <a href="print.html">印刷页</a>。第 16 卷「masterkey」的密文是拿口令字母部分作 Vigenère 密钥生成的，更换口令必须同步重算该卷密文。</p>
+   <div class="terminal-block">SEAL: Z00-PALIMPSEST
+SHA-256(norm) : b199dda7b9c08bc21053794ecedb18ad9cdc7b1e7a54f39090dfaa89bb577bc5</div>
+   <p class="tiny">QR 内容：https://anormalm.github.io/recursive-web-2/?seal=Z00-PALIMPSEST<br />
+   更换口令后：重算 SHA-256（NFKC 大写、去除 <code>-_/:.,()</code> 等符号后再哈希）更新 config.js 的 sealSha256，并重新生成 <a href="print.html">印刷页</a>。第 16 卷「masterkey」的密文是拿口令字母部分作 <b>Autokey primer</b>（密钥流 = primer + 明文自续）生成的，更换口令必须同步重算该卷密文与 acceptedHash.masterkey。</p>
 
-   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">二、取件坐标</h2>
-   <div class="terminal-block">演示坐标：N 1.290270 / E 103.851789
-密文（已写入 config.js pickup.encodedCoords）：2176368712612665</div>
-   <p class="tiny">加密规则：把纬度+经度的十进制数字连成一条串（本演示 7+9=16 位），逐位加循环密钥 1,9,8,6（来自第 8 卷 MIRROR YEAR 1986），逢十取模。玩家逐位减去 1986 即还原。</p>
+   <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">二、取件坐标（SHA-8 密钥）</h2>
+   <div class="terminal-block">演示坐标：N 1.290270 / E 103.851789（数字串 1290270103851789）
+密钥：05878356 —— SHA-256(A4) 摘要中跳过字母后的前 8 位数字
+密文（已写入 config.js pickup.encodedCoords）：1777005708629035</div>
+   <p class="tiny">加密规则：把纬度+经度的十进制数字连成一条串（本演示 7+9=16 位），逐位加循环密钥，逢十取模。玩家须先在第 6 卷卷面读到 SHA-256(A4) 摘要，取其前 8 位数字（跳过字母），再逐位相减还原。</p>
    <p class="k" style="margin:18px 0 8px">换地点重新编码（仅本页使用，不入公开仓库）：</p>
    <p class="muted">纬度数字串（如 1.290270 → 1290270）：<input id="lat" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="12" value="1290270" /><br />
-   经度数字串（如 103.851789 → 103851789）：<input id="lon" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="12" value="103851789" /></p>
-   <p><button class="btn" id="enc">生成密文</button>　<code id="encout">2176368712612665</code></p>
-   <p class="tiny">生成后把结果填入 config.js 的 pickup.encodedCoords。</p>
+   经度数字串（如 103.851789 → 103851789）：<input id="lon" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="12" value="103851789" /><br />
+   8 位数字密钥（默认 SHA-8）：<input id="key" style="border:none;border-bottom:1px solid #8b857a;font:inherit" size="10" value="05878356" /></p>
+   <p><button class="btn" id="enc">生成密文</button>　<code id="encout">1777005708629035</code></p>
+   <p class="tiny">生成后把结果填入 config.js 的 pickup.encodedCoords。密钥不改就保持 05878356。</p>
 
    <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">三、印刷页</h2>
-   <p class="muted"><a href="print.html">print.html</a> —— A4 打印，整页只有一个居中 QR 码，别无他物。打印后按当日取件安排放置在经许可的公共取件点。玩家扫码回到本站即自动完成第 12 卷核验，回执页显示封存口令（即第 16 卷密钥）。</p>
+   <p class="muted"><a href="print.html">print.html</a> —— A4 打印，整页只有一个居中 QR 码，别无他物。打印后按当日取件安排放置在经许可的公共取件点。玩家扫码回到本站即自动完成第 12 卷核验，回执页显示封存口令（即第 16 卷 Autokey 的 primer 来源）。</p>
 
    <h2 class="rec-title" style="font-size:20px;margin:32px 0 8px">四、完整攻略（答案与钥匙流向）</h2>
-   <div class="terminal-block">1  registry    十六进制字节 → "YH-17 MARK II DESK SET"      → YH17MARKIIDESKSET
-2  institution 1946 年 NUS 前身全名                         → RAFFLES COLLEGE（第 5 卷密钥）
-3  namecode    附页索引前后两段对调（15:10 = 第10行第15字）→ 档案员许静仪录
-4  building    备忘留空的 2026 名称                          → UOB INNOVATION HUB
-5  reelnote    Vigenère（密钥 RAFFLESCOLLEGE）               → THE TWO SIGNALS SHARE A SINGLE SOURCE
-6  reels       A4 + B7（比对器）                             → 通关后卷面留采样摘要存档
-7  dial        纸上编号 7 2 6 10 3 4 5 9 8 11 13 12 1 依次读触点字符 → CABINET B ANNEX（指向第 13 卷所在）
-8  tracks      SKY/FLOOR 双轨只读点亮轨道，14 拍             → MIRROR YEAR 1986（1986 = 第 12 卷位移密钥）
-9  parity      0110111 翻第 5 位 → 0110011                   → 部件校验
-10 audit       Earth-online：345/672/20261003               → 部件校验
-11 hiddenindex 四段残片：控制台 SEG1 + /core-17/ SEG2(base64: RFJBV0VSIA==) + 404 页 SEG3 + catalog 注释 SEG4；HEX→ASCII → EIGHTH DRAWER OF CABINET B
-12 dropcoords  密文逐位减 1986 → 坐标；实地取纸扫码自动通关，回执即封存口令
-13 annex       罗马数字索引 行.词（IX.II = 第9行第2词）      → A WITNESS IS NOT THE AUTHOR
-14 recursion   node3.txt 二进制 → ASCII                      → 202504031730
-15 provenance  三份处理链共同 INGEST_ROOT                     → INGEST-ROOT CORE-17
-16 masterkey   Vigenère（密钥 = 封存口令字母 ZPAPERWITNESS） → THE WITNESS WAS WRITTEN NOT BORN
-17 judgment    四项判断                                       → 真 / 假 / 假 / 真</div>
-   <p class="tiny">玩家可在 dCode 等外部工具完成所有解密；网站本身从不出现任何密钥明文。逐卷详细解法见 <a href="walkthrough.html">逐卷攻略</a>。</p>
+   <div class="terminal-block">1  registry    四栏 hex + 两份批次单（乙 3-1-4-2 真）→ "YH-17 MARK II DESK SET REGISTER EIGHT PULSES ONE OPERATOR"
+2  institution 双真印章，文理渠道 → RAFFLES COLLEGE（去元音后为第 5 卷密钥）
+3  namecode    索引七组：倒序→+1→段对调→书籍密码 → 档案员许静仪录
+4  building    2015 双真名（红鲱鱼），2026 空白 → UOB INNOVATION HUB
+5  reelnote    Atbash → Vigenère（密钥 RFFLSCLLG = 答案2 去元音）→ BOTH REELS WERE CUT FROM ONE MASTER TAPE
+6  reels       A4 + B7（部件校验）→ 卷面留 SHA-256(A4) 摘要
+7  dial        纸上序点触得乱序转写；按触点编号 1–13 重读 → B DRAWER EIGHTH
+8  tracks      亮格连读 MIRRORYEAR1986（是密钥不是答案）→ Vigenère 解第二行 → THE LOWER TRACK COPIED THE UPPER
+9  parity      三接收字乙可修：翻第 3 位 → 0110011（部件校验）
+10 audit       仓库自行检索：345/672/20261003（注意 legacy banner 陷阱）
+11 hiddenindex 五段残片（ARCHIVE-DEPT 已注销）按 SYS-LOG/ROBOT/ERR-PAGE/INDEX 序拼合 → THE ORIGINAL IS OUTSIDE THE BUILDING
+12 dropcoords  摘要前 8 位数字 05878356 逐位减密文 → 坐标；实地取纸扫码自动通关
+13 annex       两列索引：乙列指向中文第三抄本（行.字）→ 原件不在楼里（甲列英文是陷阱）
+14 recursion   二进制→ASCII(base64)→base64 解码(hex)→hex 解码 → 202504031730
+15 provenance  四条链，1998 注销链 CORE-18 为陷阱 → INGEST-ROOT CORE-17
+16 masterkey   Autokey（primer ZPALIMPSEST = 封条字母）→ THE WITNESS WAS WRITTEN NOT BORN AND THE INK IS STILL WET
+17 judgment    六项判断 → 真 / 假 / 假 / 真 / 假 / 真
+终局 finale    幕间语 17 卷首字藏头 → 你在修复档案其实档案也在悄悄修复你</div>
+   <p class="tiny">玩家可在 dCode 等外部工具完成所有解密；网站本身从不出现任何密钥明文，也不提供任何外部链接。逐卷详细解法见 <a href="walkthrough.html">逐卷攻略</a>。</p>
   </div>
  </main>
  <footer>
@@ -62,8 +65,10 @@ SHA-256(norm) : 85e1dc9534f19ee27e28b27f373a59a9ef9d4fc03d875c96fe536361c03efbf1
  </footer>
  <script>
  document.getElementById('enc').addEventListener('click',()=>{
-  var lat=document.getElementById('lat').value.replace(/\D/g,''),lon=document.getElementById('lon').value.replace(/\D/g,''),s=lat+lon,k='1986',o='';
-  for(var i=0;i<s.length;i++){o+=String((Number(s[i])+Number(k[i%4]))%10)}
+  var lat=document.getElementById('lat').value.replace(/\D/g,''),lon=document.getElementById('lon').value.replace(/\D/g,''),
+      k=document.getElementById('key').value.replace(/\D/g,''),s=lat+lon,o='';
+  if(k.length!==8){document.getElementById('encout').textContent='密钥须为 8 位数字';return}
+  for(var i=0;i<s.length;i++){o+=String((Number(s[i])+Number(k[i%8]))%10)}
   document.getElementById('encout').textContent=o;
  });
  </script>

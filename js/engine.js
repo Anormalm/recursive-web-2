@@ -6,10 +6,12 @@
  const STORAGE_KEY = 'zephyr-zero-arg-v1';
  // 档号与目录题名：与馆藏目录页（catalog.html）保持一致。
  const ARCHIVE_NO = {registry:'WX-1946-011',institution:'WX-1946-012',namecode:'WX-1946-013',building:'WX-1986-021',reelnote:'WX-1986-022',reels:'WX-1986-023',dial:'WX-1986-031',tracks:'WX-1986-032',parity:'WX-1986-033',audit:'WX-1986-041',hiddenindex:'ZF-2026-042',dropcoords:'ZF-2026-043',annex:'WX-1986-052',recursion:'ZF-2026-061',provenance:'ZF-2026-071',masterkey:'ZF-2026-081',judgment:'ZF-2026-082'};
- const TITLES = {registry:'无线电设备登记表（持有人栏缺失）',institution:'档案A附件（校印年代存疑页）',namecode:'值班名单附页（索引七组）',building:'校园建筑名称变更备忘（复印件）',reelnote:'第二卷录音夹页（密文纸条）',reels:'数字采样列表（REEL-A / REEL-B）',dial:'十三触点信号转盘图',tracks:'双轨信号修复记录图',parity:'电气工程校验记录（磁带附页）',audit:'1986年影印件（含异常插入行）',hiddenindex:'第042号卷宗（数字化失败）',dropcoords:'取件通知（Z-00）',annex:'B柜英文维修附录',recursion:'前代项目引用件（旧网页打印件）',provenance:'三份材料处理日志摘录',masterkey:'加密封存的原始审计表',judgment:'审计判断表（四行）'};
- const defaultState = () => ({v:1,started:false,stepUnlocked:0,current:0,hints:{},notes:'',solved:{},receivedSeal:'',ended:false,endingChoice:'',waveA:null,waveB:null,bits:'0110111',verdict:[null,null,null,null],traceOpen:[],drawAttempts:0,introDismissed:false});
+ const TITLES = {registry:'无线电设备登记表（持有人栏缺失）',institution:'档案A附件（双印章存疑页）',namecode:'值班名单附页（索引七组）',building:'校园建筑名称变更备忘（复印件）',reelnote:'第二卷录音夹页（密文纸条）',reels:'数字采样列表（REEL-A / REEL-B）',dial:'十三触点信号转盘图',tracks:'双轨信号修复记录图',parity:'电气工程校验记录（三个接收字）',audit:'1986年影印件（含异常插入行）',hiddenindex:'第042号卷宗（数字化失败）',dropcoords:'取件通知（Z-00）',annex:'B柜英文维修附录（两列索引）',recursion:'旧档引用件（递归残档）',provenance:'四份材料处理日志摘录',masterkey:'加密封存的原始审计表',judgment:'审计判断表（六行）'};
+ const defaultState = () => ({v:1,started:false,stepUnlocked:0,current:0,hints:{},notes:'',solved:{},receivedSeal:'',ended:false,endingChoice:'',waveA:null,waveB:null,bits:'0100011',verdict:[null,null,null,null,null,null],traceOpen:[],drawAttempts:0,maiTapped:[],capstoneOk:false,introDismissed:false});
  let state;
  try { state = {...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')}; } catch {state=defaultState()}
+ // 旧存档兼容：判断题不足六项的补空。
+ state.verdict = Array.from({length:6},(_,i)=>state.verdict?.[i]??null);
  let resultMessage = '', curStep = null, REL = './', failStreak = 0;
  let panelKind = null, panelEvId = null;
  const norm = v => String(v??'').normalize('NFKC').toUpperCase().replace(/[\s\-_/:.,，。；;()（）\[\]]/g,'');
@@ -28,20 +30,21 @@
  function allEvidence(){const allowed=new Set();D.steps.slice(0,Math.min(stepCount,state.stepUnlocked+1)).forEach(s=>(s.evidence||[]).forEach(a=>allowed.add(a)));return [...allowed]}
  async function sha256Text(text){const bytes=new TextEncoder().encode(text),digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
  const acceptedHash = {
-  registry:'46b7699ca0d8af3e383032134cd522fbb9be0196a3c005eab28107eeee50684e',
+  registry:'fec373c6eee960919ca55d467bc84ac21fc42393d3023f797e7dc23cfa8c6a99',
   institution:'b4dec72f48fcec95ad30ffcdfc00c60694495212a0926447e75cef82cb1e217b',
   namecode:'fe5319a299d6405d01ac734871d17c6dc8f1f179acd51ad61caf0a0ab594d88c',
   building:'9893e409c7a9345b6aa41535796eff4310271c74ea976b67912d28ea453559c7',
-  reelnote:'19fcc62b795dc479f33f8401dc6431e76455288434c1ba451eb76c9825daf502',
-  dial:'36d9124ee34bfd61f64f7a9a704a6c65bfa1112ebdcfa51977a7a3fdf17605d1',
-  tracks:'17cc2fc746250a574d19430cccc74fe4370416799c21f6b1e223c1dd24706dbb',
+  reelnote:'044ea6832dda8d5d166e146995f06a4f20ab068f3369abc4ca18ee3121c43c32',
+  dial:'3f7f1eb3bbf379c2fc803158ec5b9a6436d8bf9af04292ced62b4b1dce5f513d',
+  tracks:'95b35eb24850e2f1b198251e3b586f8c4e7db70663d4a6ef5194337039f0bbc4',
   audit:'498e1ba825b5509a6a1d1a5a756eb949d56b2f7b249905147fcebfaf54476759',
-  hiddenindex:'f996f2b5ac9c17c2d9b3477672515c793c2c2e9263559448f9ee14d4ad4f7ca3',
-  annex:'31b863994d82f82d713c5655b4b7c3ebafcf01395424d53bb5dbf0ede6fb8c9d',
+  hiddenindex:'64020919c77ccc71bb66afc723d05284a4ff34e71c9a69289742a43543c84fed',
+  annex:'2898d5d8c4d452125797f5ca9398050b66ce66ad351d8ed6b2f153a7fd45236f',
   recursion:'efca1f21c91251d72b5e3121f7755698ba956fd426fea08892efb989c14eec02',
   provenance:'d8bef60d4bc0aa1ce299f4410e303a39132714e455ce6ca6aacb20243a80d3d6',
-  masterkey:'1a5f6ee3a9caf694db15f35f2de46bcc1bc3634857546e1d3032687101312243'
+  masterkey:'a77f3990fa984c9abb45566a1ac500e5096ac4c83bd451968cfe9fac70017538'
  };
+ const finaleCapstoneHash = '2de847be143a0f215df255c8586163c48f9f6e2def77f7ba2f5b109885a0827c';
  // 校验失败只给冷回复。没有方法，没有格式提示，没有第二次机会之外的宽限。
  function rejectMsg(){const staged=['校验失败 :: CHECKSUM MISMATCH','输入与既有校验值不一致。记录未变更。'];return staged[Math.min(failStreak,staged.length)-1]}
  async function submitInput(value){let s=curStep;if(!s||isDone(stepIdx(s.id)))return;const input=norm(value);
@@ -61,21 +64,21 @@
  /* ===== 档案材料（只呈现原始材料本身，不带任何方法说明） ===== */
  function term(s){return `<div class="terminal-block">${esc(s)}</div>`}
  function renderMaterial(s){switch(s.kind){
-  case 'hex':return term('NO. 00 / DEVICE REGISTRY · 17 NOV 1946 · 23:17\nCHANNEL: WX/17\nREGISTER: 59 48 2D 31 37 20 4D 41 52 4B 20 49 49 20 44 45 53 4B 20 53 45 54\nOPERATOR: [FIELD LOST]');
-  case 'source':return term(s.id==='institution'?'ARCHIVE A / ANNEX LETTERHEAD\nSTAMP: NUS / 1946\nINK: CONSISTENT WITH PERIOD':'CAMPUS BUILDING MEMO / FRAGMENT\n1986: NTI / SOUTH-WEST CAMPUS\n2015: THE HIVE\n2026: [ ]');
+  case 'hex':return term('NO. 00 / DEVICE REGISTRY · 17 NOV 1946 · 23:17\nCHANNEL: WX/17 · 文理注册渠道\nC1: 4D 41 52 4B 20 49 49 20 44 45 53 4B 20 53 45 54\nC2: 4F 4E 45 20 4F 50 45 52 41 54 4F 52\nC3: 59 48 2D 31 37\nC4: 52 45 47 49 53 54 45 52 20 45 49 47 48 54 20 50 55 4C 53 45 53\n栏序：见批次单（证物两份）。');
+  case 'source':return term(s.id==='institution'?'ARCHIVE A / ANNEX LETTERHEAD\nSTAMP I: NUS / 1946\nSTAMP II: KING EDWARD VII COLLEGE OF MEDICINE / 1946\nINK: BOTH CONSISTENT WITH PERIOD\n渠道注记：WX/17 为文理注册渠道。':'CAMPUS BUILDING MEMO / FRAGMENT\n1986: NTI / SOUTH-WEST CAMPUS\n2015: THE HIVE · THE LEARNING HUB\n2026: [ ？？？ ]\n注：本楼不止一个旧名。新名见本校 2026 年新闻稿。');
   case 'book-zh':return `<div class="paper"><div class="paper-title">第三抄本 / 1946 RECOVERED WORKBOOK</div><pre class="paper-lines">${esc(D.manual.map((l,i)=>`${pad(i+1)}  ${l}`).join('\n'))}</pre><span class="paper-index">${esc(s.clue)}</span></div>`;
-  case 'cipher':return term(`${s.clue}\n\n[印章] KEY: AS REGISTERED IN 1946`);
+  case 'cipher':return term(`${s.clue}\n\n[印章] KEY: AS REGISTERED IN 1946 · TELEGRAPHIC FORM`);
   case 'wave':return renderWave();
   case 'maimai':return renderMai();
   case 'arcaea':return renderArcaea();
   case 'hamming':return renderHamming();
   case 'earth':return renderGacha();
-  case 'absent':return term('TRANSFER STATUS: FAILED\nPAGES DIGITIZED: 0\n\n该卷材料未随数字化系统保存。');
+  case 'absent':return term('TRANSFER STATUS: FAILED\nPAGES DIGITIZED: 0\n\n该卷材料未随数字化系统保存。\n分发渠道各有代号；渠道顺序见系统日志。');
   case 'drop':return renderDrop(s);
   case 'book-en':return `<div class="paper"><div class="paper-title">CABINET B / MAINTENANCE ANNEX / 1986</div><pre class="paper-lines">${esc(D.annex.map((l,i)=>`${pad(i+1)}  ${l}`).join('\n'))}</pre><span class="paper-index">${esc(s.clue)}</span></div>`;
-  case 'binary':return term('SOURCE: recursive-web / node3.txt\n\n00110010 00110000 00110010 00110101\n00110000 00110100 00110000 00110011\n00110001 00110111 00110011 00110000');
+  case 'binary':return term('SOURCE: 递归实验残档 · 节点不详\n\n01010011 01010001 01010000 01010101\n01010011 01000101 01001000 01010101\n01000111 01001000 01001011 01001100\n01011000 01000100 01011000 01001111\n01000101 01010001 01011001 01010010\n00111101 00111101 00111101 00111101');
   case 'provenance':return renderProvenance();
-  case 'sealed':return term('AUDIT TABLE / ORIGINAL / SEALED\n\nSWE LMKJMLF ASK VGIIXVJ VHG FGJM\n\nSEAL: INTACT · KEY NOT ON FILE')+`<p class="tiny seal-footnote">原件不在服务器里。</p>`;
+  case 'sealed':return term('AUDIT TABLE / ORIGINAL / SEALED\n\nSWEHQ FCWWK PTZAN QMGIF FKTTK IVTGH\nGUSBO YZFSG LESAM G\n\nSEAL: INTACT · KEY NOT ON FILE')+`<p class="tiny seal-footnote">原件不在服务器里。</p>`;
   case 'verdict':return renderVerdict();
   default:return ''
  }}
@@ -102,11 +105,16 @@
   if(same){complete('reels');return}
   resultMessage=`采样不一致 :: A${state.waveA+1} ≠ B${state.waveB+1}`;sfx.reject();reboot();let el=document.getElementById('wave-digest');if(el)el.textContent=`SHA(A) ${hashA.slice(0,24)}… / SHA(B) ${hashB.slice(0,24)}…`
  }
- const maiLetters=['X','A','N','E','T','B','C','A','B','I','N','E','N'];const maiOrder=[7,2,6,10,3,4,5,9,8,11,13,12,1];
- function renderMai(){const N=maiLetters.length,r=112,ox=150,oy=150,padPx=48;let pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N;const x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2;return `<button class="mai-pad" data-mai="${i+1}" style="left:${x}px;top:${y}px;width:${padPx}px;height:${padPx}px" aria-label="触点 ${i+1} 字符 ${c}"><small>${i+1}</small>${c}</button>`}).join('');return `<div class="mai-scene reveal"><div class="mai-round">${pads}<div class="mai-center">13 CHANNELS</div></div><div class="mai-info"><div class="mai-taps">${maiOrder.map(n=>`<span class="tap-number">${n}</span>`).join('')}</div></div></div>`}
+ /* 转盘：字符须逐个触发显示；纸上编号只是转写顺序，转盘自己的次序才是读法。 */
+ const maiLetters=['B','D','R','A','W','E','R','E','I','G','H','T','H'];
+ function renderMai(){const N=maiLetters.length,r=112,ox=150,oy=150,padPx=48;
+  const revealed=new Set(state.maiTapped||[]);
+  let pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N;const x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2;return `<button class="mai-pad" data-mai="${i+1}" style="left:${x}px;top:${y}px;width:${padPx}px;height:${padPx}px" aria-label="触点 ${i+1}"><small>${i+1}</small>${revealed.has(i+1)?c:'·'}</button>`}).join('');
+  const taps=state.maiTapped||[];
+  return `<div class="mai-scene reveal"><div class="mai-round">${pads}<div class="mai-center">13 CHANNELS</div></div><div class="mai-info"><div class="mai-taps">${taps.length?taps.map(n=>`<span class="tap-number">${n}</span>`).join(''):'<span class="tiny">触发触点以显示字符</span>'}</div>${taps.length>=N?`<div class="terminal-block">TRANSCRIPT :: ${esc(taps.map(n=>maiLetters[n-1]).join(''))}</div><p><button class="btn" data-act="mai-reset">清空转写</button></p>`:(taps.length?'<p><button class="btn" data-act="mai-reset">清空转写</button></p>':'')}</div></div>`}
  const arcaeaTarget='MIRRORYEAR1986';const arcaeaActive=['sky','floor','sky','floor','floor','sky','sky','floor','sky','floor','floor','sky','floor','sky'];
  const otherNoise=['Q','V','Z','K','T','A','7','G','L','P','W','R','5','H'];
- function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i];let s=on==='sky'?arcaeaTarget[i]:otherNoise[i],f=on==='floor'?arcaeaTarget[i]:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}return `<div class="arcaea-board reveal"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div></div>`}
+ function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i];let s=on==='sky'?arcaeaTarget[i]:otherNoise[i],f=on==='floor'?arcaeaTarget[i]:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}return `<div class="arcaea-board reveal"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div></div>`+term('SECOND LAYER / CIPHER\n\nFPVCC NCVTI MKBTC GGIDK TMLGD VP\n\n[印章] KEY: 亮格连读所得')}
  function hammingSyndrome(bits){const b=[...bits].map(Number),xor=indices=>indices.reduce((r,i)=>r^b[i-1],0);let s1=xor([1,3,5,7]),s2=xor([2,3,6,7]),s4=xor([4,5,6,7]);return {s1,s2,s4}}
  const pullCards=[
   {id:'U-11',char:'ARCHIVE / 01',star:2},{id:'U-42',char:'ARCHIVE / 02',star:2},
@@ -116,13 +124,13 @@
   {id:'U-37',char:'ARCHIVE / 09',star:2},{id:'U-31',char:'ARCHIVE / 10',star:3}
  ];
  function renderGacha(){return `<div class="gacha-sim reveal"><div class="gacha-grid">${state.drawAttempts?pullCards.map((c,i)=>`<div class="gacha-card ${c.star===4?'ssr':c.star===3?'sr':''}" style="animation-delay:${i*50}ms"><div class="gacha-stars">${'★'.repeat(c.star)}</div><div class="gacha-symbol">${c.star===4?'Z':String(i+1).padStart(2,'0')}</div><div class="gacha-card-name">${esc(c.char)}</div><div class="gacha-card-id">${esc(c.id)}</div></div>`).join(''):`<div class="gacha-covered">第 345 号封存招募</div>`}</div><div class="gacha-controls"><button class="btn" data-act="gacha">${state.drawAttempts?'再次重建同一段招募':'恢复十连招募'} →</button><span class="tiny">REPLAY COUNT: ${state.drawAttempts}</span></div>${state.drawAttempts>=2?'<p class="gacha-warning">REPLAY ANOMALY：两次重建的顺序与结果完全一致。</p>':''}</div><div class="terminal-block reveal">GACHA_ID = ???\nDISPLAY_CARD_SOURCE_ID = ???\nINITIAL_COMMIT_DATE = ????????\n\nREFERENCE: Zephyruz/Earth-online</div>`}
- function renderHamming(){const syn=hammingSyndrome(state.bits);return `<div class="hamming-board reveal"><div class="bit-row">${[...state.bits].map((v,i)=>`<button class="bit-btn ${'0110111'[i]!==v?'is-flipped':''}" data-bit="${i}" aria-label="第 ${i+1} 位：${v}">${v}<small>${i+1}</small></button>`).join('')}</div><div class="syndrome">S4 / S2 / S1 = <b>${syn.s4}${syn.s2}${syn.s1}</b></div></div>`}
- function renderProvenance(){const options=[{id:'1946',t:'1946 / DIARY-IMAGE',children:['narrative-v3','OCR-MERGE','CORE-17']},{id:'1986',t:'1986 / REEL-B',children:['signal-v2','REEL-EXPORT','CORE-17']},{id:'2026',t:'2026 / EVALUATION',children:['eval-v6','REPORT-ASSEMBLER','CORE-17']}];return `<div class="dossier-list reveal">${options.map(o=>`<button class="dossier-item linkbtn" data-trace="${o.id}"><span class="dossier-date">INPUT NODE / ${o.id}</span> <span class="dossier-name">${o.t} ${state.traceOpen.includes(o.id)?'−':'+'}</span><br>${state.traceOpen.includes(o.id)?o.children.map((x,i)=>`↳ ${i===2?'INGEST_ROOT':'PARENT_'+(i+1)}: ${x}`).join('<br>'):'展开处理链'}</button>`).join('')}</div>`}
+ function renderHamming(){const syn=hammingSyndrome(state.bits);return `<div class="hamming-board reveal"><div class="bit-row">${[...state.bits].map((v,i)=>`<button class="bit-btn ${'0100011'[i]!==v?'is-flipped':''}" data-bit="${i}" aria-label="第 ${i+1} 位：${v}">${v}<small>${i+1}</small></button>`).join('')}</div><div class="syndrome">S4 / S2 / S1 = <b>${syn.s4}${syn.s2}${syn.s1}</b></div></div>`}
+ function renderProvenance(){const options=[{id:'1946',t:'1946 / DIARY-IMAGE',children:['narrative-v3','OCR-MERGE','CORE-17']},{id:'1986',t:'1986 / REEL-B',children:['signal-v2','REEL-EXPORT','CORE-17']},{id:'1998',t:'1998 / SURVEY 〔已注销〕',children:['survey-idx','LEGACY-IMPORT','CORE-18']},{id:'2026',t:'2026 / EVALUATION',children:['eval-v6','REPORT-ASSEMBLER','CORE-17']}];return `<div class="dossier-list reveal">${options.map(o=>`<button class="dossier-item linkbtn ${o.id==='1998'?'is-revoked':''}" data-trace="${o.id}"><span class="dossier-date">INPUT NODE / ${o.id}</span> <span class="dossier-name">${o.t} ${state.traceOpen.includes(o.id)?'−':'+'}</span><br>${state.traceOpen.includes(o.id)?o.children.map((x,i)=>`↳ ${i===2?'INGEST_ROOT':'PARENT_'+(i+1)}: ${x}`).join('<br>'):'展开处理链'}</button>`).join('')}</div>`}
  function renderDrop(s){const done=isDone(stepIdx('dropcoords'));
   if(done){return `<div class="drop-receipt reveal"><div class="eyebrow">封存回执 / Z-00 / RECEIVED</div><pre class="seal-code">${esc(state.receivedSeal||'【记录缺失】')}</pre><p class="tiny">封存条已核验。回执随卷存档；纸上原件即密钥凭证。</p></div>`}
   return `<div class="drop-lock reveal"><div class="eyebrow">Z-00 / DELIVERY LOCK</div><pre class="seal-code">${esc(C.pickup.encodedCoords||'')}</pre><p class="tiny">${esc(C.pickup.instructions||'')}</p></div>`}
- const questions=[['1946 年设备记录确实记载了八组电脉冲。',true],['许静仪的身份已由 1946 年未经修改的人员原件证实。',false],['1986 第二卷录音独立于第一卷采样形成。',false],['2026 内部的独立审计记录曾被人为筛选或改写。',true]];
- function renderVerdict(){return `<div class="terminal-block reveal">FINAL AUDIT / ORIGINAL SOURCE\nDEVICE INDEX: 见第一卷\nFOUND: EIGHT PULSES\nOPERATOR IDENTITY: NOT ESTABLISHED\nSAMPLE INDEPENDENCE: FAILED\nEVALUATION INTEGRITY: FAILED</div><div class="dossier-list reveal" style="margin-top:16px">${questions.map((q,i)=>`<div class="claim"><div class="memory-card-title">CLAIM ${pad(i+1)}</div><div class="claim-text">${esc(q[0])}</div><div class="validation-grid"><label><input type="radio" name="claim${i}" value="T" ${state.verdict[i]===true?'checked':''}/> 可由证据支持</label><label><input type="radio" name="claim${i}" value="F" ${state.verdict[i]===false?'checked':''}/> 不能由证据支持</label></div></div>`).join('')}</div>`}
+ const questions=[['1946 年设备记录确实记载了八组电脉冲。',true],['许静仪的身份已由 1946 年未经修改的人员原件证实。',false],['1986 第二卷录音独立于第一卷采样形成。',false],['2026 内部的独立审计记录曾被人为筛选或改写。',true],['登记表上第二枚 1946 印章（KING EDWARD VII COLLEGE OF MEDICINE）系 2026 年伪造。',false],['2015 年该建筑曾同时正式使用 THE HIVE 与 THE LEARNING HUB 两个名字。',true]];
+ function renderVerdict(){return `<div class="terminal-block reveal">FINAL AUDIT / ORIGINAL SOURCE\nDEVICE INDEX: 见第一卷\nFOUND: EIGHT PULSES\nOPERATOR IDENTITY: NOT ESTABLISHED\nSAMPLE INDEPENDENCE: FAILED\nEVALUATION INTEGRITY: FAILED\nSECOND STAMP 1946: GENUINE / OFF-CHANNEL\n2015 DUAL NAME: BOTH OFFICIAL</div><div class="dossier-list reveal" style="margin-top:16px">${questions.map((q,i)=>`<div class="claim"><div class="memory-card-title">CLAIM ${pad(i+1)}</div><div class="claim-text">${esc(q[0])}</div><div class="validation-grid"><label><input type="radio" name="claim${i}" value="T" ${state.verdict[i]===true?'checked':''}/> 可由证据支持</label><label><input type="radio" name="claim${i}" value="F" ${state.verdict[i]===false?'checked':''}/> 不能由证据支持</label></div></div>`).join('')}</div>`}
  function submitVerdict(){const chosen=state.verdict;if(chosen.some(x=>x===null)){resultMessage='尚有未完成的判断。';reboot();return}const all=questions.every((q,i)=>q[1]===chosen[i]);if(all){complete('judgment')}else{sfx.reject();resultMessage='至少一项结论与原件不符。';reboot()}}
  /* ===== 卷宗装配（著录：档号 / 题名 / 状态；无序号计数） ===== */
  function recMeta(s){const idx=stepIdx(s.id);const no=ARCHIVE_NO[s.id]||'—';const status=isDone(idx)?'修复校验已完成':'开放阅览';
@@ -174,6 +182,7 @@
   if(drawer)drawer.classList.remove('open');if(backdrop)backdrop.classList.remove('open')}
  /* ===== 结案报告页 ===== */
  function finaleBody(){if(state.stepUnlocked<stepCount)return `<div class="notice">该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。</div><p><a href="index.html">回到阅览</a></p>`;
+  if(!state.capstoneOk){return `<div class="k">Z-00 · 结案档案 · 2026</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" autocomplete="off" spellcheck="false" placeholder="拆封口令"/><button type="submit" class="btn">拆封</button></form></div>${renderFeedback()}`}
   return `<div class="k">Z-00 · 结案档案 · 2026</div><h2 class="finale-h">第零号证人从未出生。</h2><div class="terminal-block">CASE Z-00 / CLOSED
 身份：许静仪 · 合成于 2026
 SOURCE ROOT: CORE-17
@@ -187,7 +196,8 @@ REEL-A / REEL-B：共享采样
   case 'nav':navigate(el.dataset.rec);break;
   case 'compare-wave':await verifyWave();break;
   case 'gacha':state.drawAttempts=(state.drawAttempts||0)+1;save();reboot();break;
-  case 'check-hamming':{let syn=hammingSyndrome(state.bits),changes=[...state.bits].filter((v,i)=>v!=='0110111'[i]).length;if(syn.s1===0&&syn.s2===0&&syn.s4===0&&changes===1&&state.bits==='0110011'){complete('parity')}else{sfx.reject();resultMessage='S4S2S1 ≠ 000 :: 单比特修正未完成。';reboot()}break}
+  case 'check-hamming':{let syn=hammingSyndrome(state.bits),changes=[...state.bits].filter((v,i)=>v!=='0100011'[i]).length;if(syn.s1===0&&syn.s2===0&&syn.s4===0&&changes===1&&state.bits==='0110011'){complete('parity')}else{sfx.reject();resultMessage='S4S2S1 ≠ 000 :: 单比特修正未完成。';reboot()}break}
+  case 'mai-reset':{state.maiTapped=[];save();reboot();break}
   case 'check-verdict':submitVerdict();break;
   case 'export':downloadText('zephyr-investigation-notes.txt',state.notes||'（空白调查笔记）');break;
   case 'audio':{sfx.toggle();showToast(audioMuted?'系统提示音已关闭':'系统提示音已开启');renderPanel();break}
@@ -198,9 +208,13 @@ REEL-A / REEL-B：共享采样
  scope.querySelectorAll('[data-wave]').forEach(el=>el.addEventListener('click',()=>{const [side,n]=el.dataset.wave.split(':');state[side==='A'?'waveA':'waveB']=Number(n);sfx.blip(430,.05,'sine',.012);save();reboot()}));
  scope.querySelectorAll('[data-bit]').forEach(el=>el.addEventListener('click',()=>{let i=Number(el.dataset.bit),b=[...state.bits];b[i]=b[i]==='1'?'0':'1';state.bits=b.join('');sfx.blip(660,.04,'square',.01);save();reboot()}));
  scope.querySelectorAll('[data-trace]').forEach(el=>el.addEventListener('click',()=>{let id=el.dataset.trace;state.traceOpen=state.traceOpen.includes(id)?state.traceOpen.filter(x=>x!==id):[...state.traceOpen,id];save();reboot()}));
- scope.querySelectorAll('[data-mai]').forEach(el=>el.addEventListener('click',()=>{let n=Number(el.dataset.mai);playTap(n);el.classList.add('blink');setTimeout(()=>el.classList.remove('blink'),160)}));
+ scope.querySelectorAll('[data-mai]').forEach(el=>el.addEventListener('click',()=>{let n=Number(el.dataset.mai);if((state.maiTapped||[]).includes(n)){playTap(n);return}state.maiTapped=[...(state.maiTapped||[]),n];playTap(n);save();reboot()}));
  scope.querySelectorAll('input[type="radio"][name^="claim"]').forEach(el=>el.addEventListener('change',()=>{let i=Number(el.name.replace('claim',''));state.verdict[i]=el.value==='T';save()}));
  const form=scope.querySelector('#answer-form');if(form)form.addEventListener('submit',e=>{e.preventDefault();const field=scope.querySelector('#answer-input');const raw=field?.value||'';submitInput(raw)});
+ const capform=scope.querySelector('#capstone-form');if(capform)capform.addEventListener('submit',async e=>{e.preventDefault();const raw=scope.querySelector('#capstone-input')?.value||'';
+  if(await sha256Text(norm(raw))===finaleCapstoneHash){state.capstoneOk=true;save();resultMessage='';failStreak=0}
+  else{failStreak++;resultMessage=rejectMsg();sfx.reject()}
+  const fb=document.getElementById('finale-body');if(fb){fb.innerHTML=finaleBody();wire(fb);animateIn(fb)}});
  }
  function reboot(){const body=document.getElementById('reader');
   if(body&&curStep){body.innerHTML=recordBody(curStep.id);wire(body);animateIn(body)}
@@ -238,10 +252,10 @@ REEL-A / REEL-B：共享采样
   '004':'转录备注 004：本页在恢复时缺少签发栏。签发人身份未确立。',
   'Z-00':'收件人档案。物品：A4 纸一张（仅印 QR）。状态：待领取。',
   'WX-17':'1946 年设备登记编号。持有人栏：[FIELD LOST]。',
-  '042':'第 042 号卷宗。数字化失败，分发残片四段。注销申请：成功。分发：无法撤回。',
+  '042':'第 042 号卷宗。数字化失败。分发残片五段，注销四段；ARCHIVE-DEPT 一段的注销申请从未提出。分发无法撤回。',
   'BOOT':'引导日志只写入档案系统。它不解释自己。'
  };
- function emitConsole(){const style='color:#b23a2e;font-family:monospace;font-size:12px';console.log('%cARCHIVE-00 :: 17 FILES RESTORED',style);console.log('%cTRANSFER LOG :: VOL. 042 FAILED :: 0 PAGES',style);console.log('%cSEGMENT 1/4 :: 45 49 47 48 54 48 20',style);console.log('%c系统不回答没有编号的问题。',style)}
+ function emitConsole(){const style='color:#b23a2e;font-family:monospace;font-size:12px';console.log('%cARCHIVE-00 :: 17 FILES RESTORED',style);console.log('%cTRANSFER LOG :: VOL. 042 :: SEGMENTS IN ORDER: SYS-LOG / ROBOT / ERR-PAGE / INDEX',style);console.log('%cSEGMENT SYS-LOG :: 54 48 45 20',style);console.log('%cLINE-A :: B-SIDE PLAYBACK 7 4 9 12 1 8 5 13 3 11 2 10 6 :: REEL UNUSABLE',style);console.log('%c系统不回答没有编号的问题。',style)}
  window.ZephyrDev={getProgress:()=>({stepUnlocked:state.stepUnlocked,current:state.current,solved:{...state.solved}}),getManual:()=>D.manual,getAnnex:()=>D.annex,query:id=>loreMap[id]||'INDEX NOT FOUND'};
  /* ===== 页面启动 ===== */
  function init(){
@@ -262,7 +276,7 @@ REEL-A / REEL-B：共享采样
    if(dclose)dclose.addEventListener('click',closePanel);
    return}
   const fb=document.getElementById('finale-body');
-  if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();return}
+  if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();wire(fb);return}
  }
  readSealFromUrl();init();
 })();
