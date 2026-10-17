@@ -4,3 +4,7 @@ specs/doc_export/
 .claude/
 .ttadk/
 skills-lock.json
+
+/gm/
+/private*/
+/dist/

@@ -29,12 +29,12 @@
  const isDone = i => i < state.stepUnlocked;
  function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({...state,current:Math.min(state.current,stepCount)}));}catch(e){console.warn('保存失败',e)}}
  const showToast = msg => {const el = document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);window.setTimeout(()=>el.remove(),3300)};
- const isPreview=()=>C.previewMode===true;
- function releaseTime(day){const t=Date.parse(C.launchAt);if(!Number.isFinite(t))return 0;return t+(day-1)*Math.max(0,C.chapterIntervalHours||0)*3600000}
- function released(day){return isPreview() || Date.now()>=releaseTime(day)}
- function launchFmt(ms){return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Shanghai'}).format(new Date(ms))}
+ // Production always enforces the configured schedule; no preview bypass.
+ function releaseTime(day){const t=Date.parse(C.launchAt);if(!Number.isFinite(t)||!Number.isInteger(day)||day<1||!Number.isFinite(C.chapterIntervalHours)||C.chapterIntervalHours<=0)return Infinity;return t+(day-1)*C.chapterIntervalHours*3600000}
+ function released(day){return Date.now()>=releaseTime(day)}
+ function launchFmt(ms){if(!Number.isFinite(ms))return '待馆方确认';return new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Shanghai'}).format(new Date(ms))}
  function isAccessible(i){return i>=0&&i<stepCount&&i<=state.stepUnlocked&&released(D.steps[i].day)}
- function allEvidence(){const allowed=new Set();D.steps.slice(0,Math.min(stepCount,state.stepUnlocked+1)).forEach(s=>(s.evidence||[]).forEach(a=>allowed.add(a)));return [...allowed]}
+ function allEvidence(){const allowed=new Set();D.steps.slice(0,Math.min(stepCount,state.stepUnlocked+1)).filter(s=>released(s.day)).forEach(s=>(s.evidence||[]).forEach(a=>allowed.add(a)));return [...allowed]}
  async function sha256Text(text){const bytes=new TextEncoder().encode(text),digest=await crypto.subtle.digest('SHA-256',bytes);return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
  const acceptedHash = {
   registry:'fec373c6eee960919ca55d467bc84ac21fc42393d3023f797e7dc23cfa8c6a99',
@@ -54,12 +54,12 @@
  const finaleCapstoneHash = '2de847be143a0f215df255c8586163c48f9f6e2def77f7ba2f5b109885a0827c';
  // 校验失败只给冷回复。没有方法，没有格式提示，没有第二次机会之外的宽限。
  function rejectMsg(){const staged=['校验失败 :: CHECKSUM MISMATCH','输入与既有校验值不一致。记录未变更。'];return staged[Math.min(failStreak,staged.length)-1]}
- async function submitInput(value){let s=curStep;if(!s||isDone(stepIdx(s.id)))return;const input=norm(value);
+ async function submitInput(value){let s=curStep;if(!s||!isAccessible(stepIdx(s.id))||isDone(stepIdx(s.id)))return;const input=norm(value);
   if(acceptedHash[s.id]&&await sha256Text(s.id+':'+input)===acceptedHash[s.id]){complete(s.id);return}
   failStreak++;sfx.reject();resultMessage=rejectMsg();reboot()
  }
  const stepIdx = id => D.steps.findIndex(s=>s.id===id);
- function complete(id){const idx=stepIdx(id);if(idx!==state.stepUnlocked||state.solved[id])return;const s=D.steps[idx];state.solved[id]=true;state.stepUnlocked=idx+1;state.current=idx;resultMessage='';failStreak=0;save();showToast(`修复校验通过 :: ${TITLES[id]||s.title} 已归档`);sfx.accept();ceremony();if(state.stepUnlocked===stepCount){console.log('%cARCHIVE-00 :: CASE Z-00 CLOSED','color:#b23a2e;font-family:monospace;font-size:12px');const fl=document.getElementById('finale-link');if(fl)fl.hidden=false}window.setTimeout(()=>reboot(),700)}
+ function complete(id){const idx=stepIdx(id);if(!isAccessible(idx)||idx!==state.stepUnlocked||state.solved[id])return;const s=D.steps[idx];state.solved[id]=true;state.stepUnlocked=idx+1;state.current=idx;resultMessage='';failStreak=0;save();showToast(`修复校验通过 :: ${TITLES[id]||s.title} 已归档`);sfx.accept();ceremony();if(state.stepUnlocked===stepCount){console.log('%cARCHIVE-00 :: CASE Z-00 CLOSED','color:#b23a2e;font-family:monospace;font-size:12px');const fl=document.getElementById('finale-link');if(fl)fl.hidden=false}window.setTimeout(()=>reboot(),700)}
  /* ===== 入场动效（prefers-reduced-motion 由 CSS 兜底） ===== */
  function animateIn(scope){const els=scope.querySelectorAll('.reveal');if(!els.length)return;
   els.forEach((el,i)=>el.style.transitionDelay=Math.min(i*70,420)+'ms');
@@ -85,7 +85,7 @@
   case 'book-en':return `<div class="paper"><div class="paper-title">CABINET B / MAINTENANCE ANNEX / 1986</div><pre class="paper-lines">${esc(D.annex.map((l,i)=>`${pad(i+1)}  ${l}`).join('\n'))}</pre><span class="paper-index">${esc(s.clue)}</span></div>`;
   case 'binary':return term('SOURCE: 递归实验残档 · 节点不详\n\n01010011 01010001 01010000 01010101\n01010011 01000101 01001000 01010101\n01000111 01001000 01001011 01001100\n01011000 01000100 01011000 01001111\n01000101 01010001 01011001 01010010\n00111101 00111101 00111101 00111101');
   case 'provenance':return renderProvenance();
-  case 'sealed':return term('AUDIT TABLE / ORIGINAL / SEALED\n\nSWEHQ FCWWK PTZAN QMGIF FKTTK IVTGH\nGUSBO YZFSG LESAM G\n\nSEAL: INTACT · KEY NOT ON FILE')+`<p class="tiny seal-footnote">原件不在服务器里。</p>`;
+  case 'sealed':return term('AUDIT TABLE / ORIGINAL / SEALED\n\nSJEYL WSFXL DEOEK VXLWJ NGPSW KGEAQ HAFWE XIFVM PPTJO B\n\nSEAL: INTACT · KEY NOT ON FILE')+`<p class="tiny seal-footnote">原件不在服务器里。</p>`;
   case 'verdict':return renderVerdict();
   default:return ''
  }}
@@ -189,7 +189,7 @@
   const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
   if(drawer)drawer.classList.remove('open');if(backdrop)backdrop.classList.remove('open')}
  /* ===== 结案报告页 ===== */
- function finaleBody(){if(state.stepUnlocked<stepCount)return `<div class="notice">该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。</div><p><a href="index.html">回到阅览</a></p>`;
+ function finaleBody(){if(!released(D.steps[stepCount-1].day)||state.stepUnlocked<stepCount)return `<div class="notice">该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。</div><p><a href="index.html">回到阅览</a></p>`;
   if(!state.capstoneOk){return `<div class="k">Z-00 · 结案档案 · 2026</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" autocomplete="off" spellcheck="false" placeholder="拆封口令"/><button type="submit" class="btn">拆封</button></form></div>${renderFeedback()}`}
   return `<div class="k">Z-00 · 结案档案 · 2026</div><h2 class="finale-h">第零号证人从未出生。</h2><div class="terminal-block">CASE Z-00 / CLOSED
 身份：许静仪 · 合成于 2026
@@ -220,7 +220,7 @@ REEL-A / REEL-B：共享采样
  scope.querySelectorAll('input[type="radio"][name^="claim"]').forEach(el=>el.addEventListener('change',()=>{let i=Number(el.name.replace('claim',''));state.verdict[i]=el.value==='T';save()}));
  const form=scope.querySelector('#answer-form');if(form)form.addEventListener('submit',e=>{e.preventDefault();const field=scope.querySelector('#answer-input');const raw=field?.value||'';submitInput(raw)});
  const capform=scope.querySelector('#capstone-form');if(capform)capform.addEventListener('submit',async e=>{e.preventDefault();const raw=scope.querySelector('#capstone-input')?.value||'';
-  if(await sha256Text(norm(raw))===finaleCapstoneHash){state.capstoneOk=true;save();resultMessage='';failStreak=0}
+  if(released(D.steps[stepCount-1].day)&&state.stepUnlocked===stepCount&&await sha256Text(norm(raw))===finaleCapstoneHash){state.capstoneOk=true;save();resultMessage='';failStreak=0}
   else{failStreak++;resultMessage=rejectMsg();sfx.reject()}
   const fb=document.getElementById('finale-body');if(fb){fb.innerHTML=finaleBody();wire(fb);animateIn(fb)}});
  }
@@ -251,7 +251,7 @@ REEL-A / REEL-B：共享采样
  /* ===== 实体取件封存条（?seal=）：扫码即核验，页面无输入框 ===== */
  function readSealFromUrl(){const args=new URLSearchParams(window.location.search),seal=args.get('seal');if(seal){state.receivedSeal=seal;save();showToast('已接收二维码携带的封存条。');args.delete('seal');const q=args.toString();try{history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash)}catch{}}}
  function maybeAutoSeal(){if(!state.receivedSeal)return;const idx=stepIdx('dropcoords');
-  if(idx!==state.stepUnlocked||state.solved.dropcoords)return;
+  if(!isAccessible(idx)||idx!==state.stepUnlocked||state.solved.dropcoords)return;
   sha256Text(norm(state.receivedSeal)).then(h=>{if(h===C.pickup.sealSha256){complete('dropcoords')}});
  }
  // 源码层：控制台属于档案系统，只留记录，不给答案。
