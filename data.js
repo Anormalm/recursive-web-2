@@ -32,15 +32,18 @@ window.ZEPHYR_DATA = (() => {
  {id:'building',day:2,kind:'source',title:'不止一个旧名',subtitle:'校园建筑名称变更备忘。最新一格空白。',description:['备忘残片记录同一建筑的三个年代。1986 年它还叫 NTI；2015 年的格子里写着两个名字——都是真的。2026 年的格子是空白。'],evidence:['aBuilding']},
  {id:'reelnote',day:2,kind:'cipher',title:'第二卷录音',subtitle:'REEL-B 内页。密文与一枚印章。',description:['两份录音编号之间夹着一张纸条。五字一组的字母，不保留任何单词间隔。纸角盖一枚章，落款是“电报式”。写纸条的人，手里应当有 1946 年的登记册。'],evidence:['aReelnote'],clue:'PQLDA XGZNU ANGPH RFOCS QXNPK SMMNL KCX'},
  {id:'reels',day:2,kind:'wave',title:'相同的噪声',subtitle:'REEL-A / REEL-B 采样清单。原件校验栏缺失。',description:['比对结论建立在“第二份独立录音”上。系统保留两卷各八段十六点整数采样。哪两段才是同一段，校验栏没有说。'],evidence:['aSamples']},
- {id:'dial',day:3,kind:'maimai',title:'十三个触点',subtitle:'触点排列图。纸上只留一串编号。',description:['损坏的记录里恢复出十三个编号触点的转盘。触点上的字符须逐个触发才会显示。纸上只留一行编号——但纸角另有小字：抄录时顺序已乱。'],evidence:['aDial'],clue:'9 2 11 5 13 7 1 4 10 6 3 12 8'},
+ {id:'dial',day:3,kind:'maimai',title:'十三个触点',subtitle:'触点排列图。纸上只留一张阻抗表。',description:['损坏的记录里恢复出十三个编号触点的转盘。触点上的字符须逐个触发才会显示。纸上只留一张表：每个触点的实测阻抗。转盘自己的次序，纸上没有写。'],evidence:['aDial'],clue:'Ω 3.3 · 0.68 · 15 · 4.7 · 1.5 · 10 · 0.47 · 33 · 47 · 6.8 · 1.0 · 22 · 2.2（kΩ，触点 1—13）'},
  {id:'tracks',day:3,kind:'arcaea',title:'天空轨道的证词',subtitle:'双轨信号修复界面。上层与下层各十四格。',description:['修复界面把信号画在上下两层，每一拍只有一格被点亮。全部亮格连读，得到一串字符；界面下方另有第二行密文——连读得到的，未必是答案。'],evidence:['aRails']},
  {id:'parity',day:3,kind:'hamming',title:'三个接收字',subtitle:'磁带附页。校验记录三份，交互板其一。',description:['B 柜的磁带附有一份电气工程校验记录，纸面备份了三个接收字：甲、乙、丙。交互板上显示其中之一。七个比特至多允许一个错。'],evidence:['aParity']},
+ {id:'noisewords',day:3,kind:'audio',title:'噪声里的字',subtitle:'WX-1986-034。原始载体，未随系统保存。',description:['比对结论依赖两卷“原始录音”，但数字化系统里没有它们。归档协议规定：未数字化的原始载体按文件层存放，路径登记在机器人的登记表上。两卷同长，同一份噪声。'],evidence:['aAudio']},
  {id:'audit',day:4,kind:'earth',title:'未来的卡牌，写在过去的纸上',subtitle:'1986 影印件中的异常插入行。字段不属于无线电。',description:['1986 年记录的影印件里多出一行英文：GACHA_ID、FEATURED_CARD、SOURCE_COMMIT。影印件末尾的引用栏里印着一个 2026 年才出现的项目名。林澄在旁边圈起两个字段，写着：“这些不是无线电术语。”'],evidence:['aAudit']},
  {id:'hiddenindex',day:4,kind:'absent',title:'没有材料的卷宗',subtitle:'第 042 号卷。数字化失败。',description:['这一卷在数字化系统里没有任何页面。调阅记录显示它曾被分发为数段残片，随后的注销申请只成功了一部分——分发本身无法撤回。'],evidence:['aHidden']},
  {id:'dropcoords',day:4,kind:'drop',title:'最后一封没有投递的信',subtitle:'取件通知。收件人栏已填写。',description:['恢复出的索引不指向图书馆，也不指向校园机房。它指向一处公共地点。许闻舟便签：“原件从来不在服务器里。要验证一份数字记录，先拿到它声称复制的纸。”'],evidence:['aDrop']},
+ {id:'newsclip',day:4,kind:'press',title:'剪角的一版',subtitle:'WX-1986-044。残件一页，报头被撕。',description:['卷宗里夹着一页剪报。报头和日期栏都撕掉了，正文还在。文章写的是一场开业。哪一天开的，纸没有说。'],evidence:['aPress']},
  {id:'annex',day:5,kind:'book-en',title:'B 柜里的两列索引',subtitle:'英文附录一页。角落两列罗马数字，各盖一枚章。',description:['1986 年的第二份维修备忘录使用英文。页面角落并排两列索引：甲列盖着“B 柜附录·本册”，乙列盖着“第三抄本”。两列都像是真的——但只有一列通向你要的那句话。'],evidence:['aAnnex'],clue:'甲列（章：B 柜附录·本册）IX.I / IX.II / IV.II / IX.IV / IX.VIII / IX.IX\n乙列（章：第三抄本）VIII.VII / VIII.VIII / VIII.I / VIII.III / VI.XIII / VI.XVII'},
  {id:'recursion',day:5,kind:'binary',title:'较早的一次递归',subtitle:'旧档引用一段。出处与年代不符。',description:['许闻舟最后一封内部邮件引用了一段旧档文字：“The street remembers the group chat.” 出处不是本馆藏件——是一份更早的递归实验残档，节点编号不详。'],evidence:['aRecursive']},
  {id:'provenance',day:5,kind:'provenance',title:'所有道路都通往同一个目录',subtitle:'四份档案的处理日志摘录。一条已注销。',description:['系统开放四份档案的部分处理日志。其中一条链盖着注销章，被馆方声明“不在馆藏范围”。其余三条来自不同年代、不同研究人员递交，却在“上游来源”字段里指向同一处。'],evidence:['aTrace']},
+ {id:'triangulate',day:5,kind:'survey',title:'三处基点',subtitle:'ZF-2026-073。外业复核记录，三线一点。',description:['调查还有一段没做完的外业复核：三个基点，三对方位与距离，三线交于一点。基点都在馆外的公开记录里查得到。复核栏只问一件事：那个点上今天立着的东西，叫什么名字。'],evidence:['aSurvey']},
  {id:'masterkey',day:6,kind:'sealed',title:'不许拆开的信',subtitle:'原始审计表。加密。封条完整。',description:['项目最终审计表的扫描件。它没有随数字化系统入库——馆方说明只有一行：原件不在服务器里。加密方式与密钥均未随文件保存。'],evidence:['aSealed']},
  {id:'judgment',day:6,kind:'verdict',title:'第零号证人的真相',subtitle:'审计判断表。六行，无结论栏。',description:['解密后的审计表有六行。没有失踪人口，没有时间旅行。三份看似独立的文件，在它的来源图谱里指向同一个 2026 年工作目录；两枚印章与两个旧名，则各占一行。'],evidence:['aVerdict']}
  ];
@@ -52,9 +55,9 @@ window.ZEPHYR_DATA = (() => {
  aWorkbook:{date:'1946 · 抄本',title:'维修台手记 / 第三抄本',type:'书籍密码文本（固定版本）',body:manual.map((l,i)=>String(i+1).padStart(2,'0')+'  '+l).join('\n')+'\n\n抄录尾注（原件戳记三枚）：\n本册以零计数。附页自下而上装订。索引两段互为倒置。标点不计入字数。'},
  aBuilding:{date:'2015—2026 · 校园线索',title:'建筑名称更改备忘',type:'历史考证提示',body:'1986: NTI / SOUTH-WEST CAMPUS\n2015: THE HIVE · THE LEARNING HUB\n2026: [ ？？？ ]\n\n注：本楼不止一个旧名；2015 年那一对名字都曾被正式使用。\n新名见本校 2026 年新闻稿（何处发布，本备忘不载）。'},
  aReelnote:{date:'2026 · 林澄便签',title:'双卷比对指令',type:'密文',body:'纸条夹在 REEL-A 与 REEL-B 之间。\n纸角盖一枚章：KEY: AS REGISTERED IN 1946 · TELEGRAPHIC FORM。\n\n除密文与印章外，纸上再无任何文字。'},
- aSamples:{date:'2026 · 声纹修复',title:'数字采样列表 / REEL-A / REEL-B',type:'信号对照说明',body:'每段含 16 个整数采样值。\n比对基线：十六点整数采样，任何一位不一致即视为不同片段。'},
- aDial:{date:'1986 / 修复于 2026',title:'十三触点信号转盘',type:'维修图',body:'触点沿顺时针编号 1—13，字符须逐个触发显示。\n纸上只留一行编号：9 2 11 5 13 7 1 4 10 6 3 12 8。\n\n纸角小字：“抄录时顺序已乱。转盘自己有它自己的次序。”'},
- aRails:{date:'2026 · 林澄',title:'双轨修复备忘',type:'信号图像',body:'上层：SKY\n下层：FLOOR\n\n页脚：亮格连读，是给下一层用的。'},
+ aSamples:{date:'2026 · 声纹修复',title:'数字采样列表 / REEL-A / REEL-B',type:'信号对照说明',body:'每卷十二段，每段含 16 个整数采样值。\n比对基线：十六点整数采样，任何一位不一致即视为不同片段。\n原件校验栏缺失。'},
+ aDial:{date:'1986 / 修复于 2026',title:'十三触点信号转盘',type:'维修图',body:'触点沿顺时针编号 1—13，字符须逐个触发显示。\n\n阻抗实测表（kΩ）：\n 1: 3.3　　2: 0.68　3: 15\n 4: 4.7　　5: 1.5　　6: 10\n 7: 0.47　8: 33　　9: 47\n10: 6.8　11: 1.0　12: 22\n13: 2.2\n\n纸角小字：“阻抗是逐个测的。至于次序，表上没有。”'},
+ aRails:{date:'2026 · 林澄',title:'双轨修复备忘',type:'信号图像',body:'上层：SKY\n下层：FLOOR\n\n页边：时标一列（1—14），誊录时未按顺序整理。\n页脚：亮格连读，是给下一层用的。'},
  aParity:{date:'2026 · EE 实验纸',title:'错误检测 / Hamming(7,4)',type:'电路备忘',body:'RECEIVED WORDS（纸面备份）：\n甲: 1010101\n乙: 0100011\n丙: 1010011\n\n校验位位置：1、2、4\n偶校验分组：\nS1 = XOR(1,3,5,7)\nS2 = XOR(2,3,6,7)\nS4 = XOR(4,5,6,7)\n\n注：交互板显示其中一字。七位中至多允许一个错。'},
  aAudit:{date:'档案标注：1946',title:'未来招募数据 / 第 345 号池',type:'异常插入内容',body:'GACHA_ID = [UNKNOWN]\nFEATURED_CARD_SOURCE_ID = [UNKNOWN]\nSOURCE_COMMIT = [UNKNOWN]\nLOCAL_SAVE_KEY = earth-online-solo-save\n\n引用栏印有项目名（见卷面）。\n若真实源代码在 2026 年才公开，不可能凭这份档案证明它写于 1946。\n注意区分现役池与遗留池。'},
  aHidden:{date:'2026 · 处理日志',title:'第 042 号卷宗 / 数字化失败',type:'系统记录',body:'TRANSFER STATUS: FAILED\nPAGES DIGITIZED: 0\n\n调阅记录显示，该卷曾以数段残片的形式对外分发。\n分发渠道各有代号；渠道顺序见系统日志。\n注销申请：部分成功。分发：无法撤回。'},
@@ -63,6 +66,9 @@ window.ZEPHYR_DATA = (() => {
  aRecursive:{date:'2025 · 旧档',title:'递归实验残档 · 节点不详',type:'旧档关联',body:'Encoded Timestamp 见卷面。\n残档出处仅存一句记录：“那栋楼里最早的住户。”\n提交说明残行：“…recursive…”'},
  aTrace:{date:'2026 · 内部处理日志',title:'追溯表 / 四份材料',type:'来源字段',body:'1946-DIARY.TIF\n1986-REEL-B.WAV\n1998-SURVEY.TIF\n2026-INDEPENDENT-AUDIT.PDF\n\n其中一条链已盖注销章，馆方声明其不在馆藏范围。\n外部存档与内部“独立审计”使用了同一个生成根。'},
  aSealed:{date:'2026 · 馆方说明',title:'原始审计表 / 封存',type:'加密文件',body:'该扫描件由林澄生前最后一次提交。\n提交说明只有一行：“原件不在服务器里。”\n\n加密方式未随文件保存。封条完整，未经拆封。\n封条印字：Z00。'},
+ aAudio:{date:'2026 · 归档协议',title:'原始载体归档协议（摘录）',type:'归档规定',body:'第三条：未随数字化系统处理的原始载体，按文件层存放，不编页码，不入目录。\n第四条：网络机器人的登记表（robots.txt）须完整登记文件层的路径。登记即排除，排除即可达。\n\n附注：REEL-A / REEL-B 即按本条归档。两卷等长。读原始载体，须自备工具。'},
+ aPress:{date:'档案标注：1986',title:'剪角残件 / 报纸一版',type:'馆外材料',body:'残件一页。报头、日期栏均被撕去。\n来源注记：馆外公开报纸数据库（影印）。\n\n残件边缘有铅笔注记，笔迹与林澄存档样本一致：“夹进卷宗那天，我核对过：这一版还有存档。”'},
+ aSurvey:{date:'2026 · 外业复核',title:'外业复核记录 / 三处基点',type:'勘测记录',body:'基点一：1946 年文理注册那所的旧校园（BUKIT TIMAH 路）\n方位 131° / 平距 4507 m\n\n基点二：第二枚印章机构的旧楼（COLLEGE ROAD）\n方位 50° / 平距 2032 m\n\n基点三：1937 年启用的旧机场塔台（KALLANG）\n方位 239° / 平距 3303 m\n\n三线交于一点。复核栏只问：该点今日之名。\n\n备注：外业未成行。记录留存待复核。'},
  aVerdict:{date:'2026 · 恢复',title:'未修改的审计摘要',type:'关键原件',body:'原始 1946 设备记录：八组脉冲，只有设备。\n\n“许静仪”的身份记录：未见当年原始登记；人物信息在 2026 的修复文本中首次出现。\n\n第二卷录音：与第一卷共享完全相同的样本段及上游数据。\n\n所谓独立评估：项目内部曾筛选或改写调查结果。\n\n第二枚 1946 印章：真实存在，但盖在与本表渠道不同的机构。\n\n2015 年建筑双名：两个名字都曾被正式使用。'}
  };
  const interludes={

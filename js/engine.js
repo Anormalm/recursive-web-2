@@ -5,14 +5,15 @@
  const D = window.ZEPHYR_DATA, C = window.ZEPHYR_CONFIG;
  const STORAGE_KEY = 'zephyr-zero-arg-v1';
  // 档号与目录题名：与馆藏目录页（catalog.html）保持一致。
- const ARCHIVE_NO = {registry:'WX-1946-011',institution:'WX-1946-012',namecode:'WX-1946-013',building:'WX-1986-021',reelnote:'WX-1986-022',reels:'WX-1986-023',dial:'WX-1986-031',tracks:'WX-1986-032',parity:'WX-1986-033',audit:'WX-1986-041',hiddenindex:'ZF-2026-042',dropcoords:'ZF-2026-043',annex:'WX-1986-052',recursion:'ZF-2026-061',provenance:'ZF-2026-071',masterkey:'ZF-2026-081',judgment:'ZF-2026-082'};
- const TITLES = {registry:'无线电设备登记表（持有人栏缺失）',institution:'档案A附件（双印章存疑页）',namecode:'值班名单附页（索引七组）',building:'校园建筑名称变更备忘（复印件）',reelnote:'第二卷录音夹页（密文纸条）',reels:'数字采样列表（REEL-A / REEL-B）',dial:'十三触点信号转盘图',tracks:'双轨信号修复记录图',parity:'电气工程校验记录（三个接收字）',audit:'1986年影印件（含异常插入行）',hiddenindex:'第042号卷宗（数字化失败）',dropcoords:'取件通知（Z-00）',annex:'B柜英文维修附录（两列索引）',recursion:'旧档引用件（递归残档）',provenance:'四份材料处理日志摘录',masterkey:'加密封存的原始审计表',judgment:'审计判断表（六行）'};
+ const ARCHIVE_NO = {registry:'WX-1946-011',institution:'WX-1946-012',namecode:'WX-1946-013',building:'WX-1986-021',reelnote:'WX-1986-022',reels:'WX-1986-023',dial:'WX-1986-031',tracks:'WX-1986-032',parity:'WX-1986-033',noisewords:'WX-1986-034',audit:'WX-1986-041',hiddenindex:'ZF-2026-042',dropcoords:'ZF-2026-043',newsclip:'WX-1986-044',annex:'WX-1986-052',recursion:'ZF-2026-061',provenance:'ZF-2026-071',triangulate:'ZF-2026-073',masterkey:'ZF-2026-081',judgment:'ZF-2026-082'};
+ const TITLES = {registry:'无线电设备登记表（持有人栏缺失）',institution:'档案A附件（双印章存疑页）',namecode:'值班名单附页（索引七组）',building:'校园建筑名称变更备忘（复印件）',reelnote:'第二卷录音夹页（密文纸条）',reels:'数字采样列表（REEL-A / REEL-B）',dial:'十三触点信号转盘图',tracks:'双轨信号修复记录图',parity:'电气工程校验记录（三个接收字）',noisewords:'双卷原始录音（未数字化文件）',audit:'1986年影印件（含异常插入行）',hiddenindex:'第042号卷宗（数字化失败）',dropcoords:'取件通知（Z-00）',newsclip:'剪角报纸残件（1986）',annex:'B柜英文维修附录（两列索引）',recursion:'旧档引用件（递归残档）',provenance:'四份材料处理日志摘录',triangulate:'外业复核记录（三处基点）',masterkey:'加密封存的原始审计表',judgment:'审计判断表（六行）'};
  // 证物翻拍照片：纯装饰做旧件，图注与画面均不含校验信息。
  const PHOTO = {
   registry:'<figure class="evidence-photo reveal"><img src="assets/1946-scan.jpg" alt="设备登记表的翻拍照片" loading="lazy"/><figcaption>设备登记表 · 1946 年翻拍件（馆藏复制）</figcaption></figure>',
   reels:'<figure class="evidence-photo reveal"><img src="assets/photo-reels.svg" alt="盘式录音机的翻拍照片" loading="lazy"/><figcaption>修复台上的盘式录音机 · 1986 年翻拍件</figcaption></figure>',
   dial:'<figure class="evidence-photo reveal"><img src="assets/photo-dial.svg" alt="信号转盘触点的翻拍照片" loading="lazy"/><figcaption>转盘触点特写 · 1986 年翻拍件</figcaption></figure>',
-  building:'<figure class="evidence-photo reveal"><img src="assets/photo-building.svg" alt="校园建筑的翻拍照片" loading="lazy"/><figcaption>西南校区旧影 · 1986 年翻拍件</figcaption></figure>'
+  building:'<figure class="evidence-photo reveal"><img src="assets/photo-building.svg" alt="校园建筑的翻拍照片" loading="lazy"/><figcaption>西南校区旧影 · 1986 年翻拍件</figcaption></figure>',
+  noisewords:'<figure class="evidence-photo reveal"><img src="assets/photo-reels.svg" alt="盘式录音机的翻拍照片" loading="lazy"/><figcaption>原始载体 · 未数字化归档</figcaption></figure>'
  };
  const defaultState = () => ({v:1,started:false,stepUnlocked:0,current:0,hints:{},notes:'',solved:{},receivedSeal:'',ended:false,endingChoice:'',waveA:null,waveB:null,bits:'0100011',verdict:[null,null,null,null,null,null],traceOpen:[],drawAttempts:0,maiTapped:[],capstoneOk:false,introDismissed:false});
  let state;
@@ -49,7 +50,10 @@
   annex:'2898d5d8c4d452125797f5ca9398050b66ce66ad351d8ed6b2f153a7fd45236f',
   recursion:'efca1f21c91251d72b5e3121f7755698ba956fd426fea08892efb989c14eec02',
   provenance:'d8bef60d4bc0aa1ce299f4410e303a39132714e455ce6ca6aacb20243a80d3d6',
-  masterkey:'a77f3990fa984c9abb45566a1ac500e5096ac4c83bd451968cfe9fac70017538'
+  masterkey:'a77f3990fa984c9abb45566a1ac500e5096ac4c83bd451968cfe9fac70017538',
+ noisewords:'47d4973b88d23ce458e1c06adca4c15c7a9fc04cd6ff8d3e2ac1e1234b640f6e',
+ newsclip:'bc48c2ddc88c4951d7ad5de01447b2d44cb2602ec2ea8967fd5ed73a549be449',
+ triangulate:'e553c192e8213a6ae642dba7adc401b636566d2cc8995451b98570706b5e34f9'
  };
  const finaleCapstoneHash = '2de847be143a0f215df255c8586163c48f9f6e2def77f7ba2f5b109885a0827c';
  // 校验失败只给冷回复。没有方法，没有格式提示，没有第二次机会之外的宽限。
@@ -84,6 +88,9 @@
   case 'drop':return renderDrop(s);
   case 'book-en':return `<div class="paper"><div class="paper-title">CABINET B / MAINTENANCE ANNEX / 1986</div><pre class="paper-lines">${esc(D.annex.map((l,i)=>`${pad(i+1)}  ${l}`).join('\n'))}</pre><span class="paper-index">${esc(s.clue)}</span></div>`;
   case 'binary':return term('SOURCE: 递归实验残档 · 节点不详\n\n01010011 01010001 01010000 01010101\n01010011 01000101 01001000 01010101\n01000111 01001000 01001011 01001100\n01011000 01000100 01011000 01001111\n01000101 01010001 01011001 01010010\n00111101 00111101 00111101 00111101');
+  case 'audio':return term('ARCHIVE PROTOCOL / WX-1986-034\n原始录音未随数字化系统保存。\nREEL-A / REEL-B：等长双卷，按文件层归档。\n机器人的登记表（robots.txt）记有文件层的全部路径。\n读原始载体，须自备工具。');
+  case 'press':return `<figure class="press-clip reveal"><img src="assets/press-1986.svg" alt="剪角报纸残件" loading="lazy"/><figcaption>剪角残件 · 1986 年报纸影印（报头与日期栏缺失）</figcaption></figure>`;
+  case 'survey':return term('SURVEY NOTE / FIELD RECHECK / ZF-2026-073\n\n基点一：1946 年文理注册那所的旧校园（BUKIT TIMAH 路）\n方位 131° / 平距 4507 m\n\n基点二：第二枚印章机构的旧楼（COLLEGE ROAD）\n方位 50° / 平距 2032 m\n\n基点三：1937 年启用的旧机场塔台（KALLANG）\n方位 239° / 平距 3303 m\n\n三线交于一点。复核栏只问：该点今日之名。');
   case 'provenance':return renderProvenance();
   case 'sealed':return term('AUDIT TABLE / ORIGINAL / SEALED\n\nSJEYL WSFXL DEOEK VXLWJ NGPSW KGEAQ HAFWE XIFVM PPTJO B\n\nSEAL: INTACT · KEY NOT ON FILE')+`<p class="tiny seal-footnote">原件不在服务器里。</p>`;
   case 'verdict':return renderVerdict();
@@ -95,9 +102,13 @@
  function renderFeedback(){return resultMessage?`<p class="feedback" role="status">${esc(resultMessage)}</p>`:''}
  /* REEL-X：真正的重复必须字节序列一致，不只是波形“看起来像”。 */
  const generateWave=(seed)=>{let x=seed>>>0;return Array.from({length:16},()=>{x=(Math.imul(1664525,x)+1013904223)>>>0;return Math.round(((x>>>11)/2097151)*190-95)})};
- const aWaves=Array.from({length:8},(_,i)=>generateWave(i*167+41));
- const bWaves=Array.from({length:8},(_,i)=>generateWave(i*239+780));
+ const aWaves=Array.from({length:12},(_,i)=>generateWave(i*167+41));
+ const bWaves=Array.from({length:12},(_,i)=>generateWave(i*239+780));
  bWaves[6]=aWaves[3].slice();
+ // 三段近伪片段：波形肉眼无异，逐位比对与摘要都不通过。
+ bWaves[2]=aWaves[3].slice();bWaves[2][7]+=1;
+ bWaves[9]=aWaves[5].slice();bWaves[9][2]-=1;
+ aWaves[11]=bWaves[4].slice();aWaves[11][9]+=1;
  const waveDigestOf=async arr=>{if(!crypto?.subtle)return '';let payload=new Uint8Array(new Int16Array(arr).buffer);let hash=await crypto.subtle.digest('SHA-256',payload);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('')};
  let waveDigest='';waveDigestOf(aWaves[3]).then(h=>{waveDigest=h;const el=document.getElementById('wave-digest-line');if(el&&curStep&&curStep.id==='reels')el.textContent=`采样摘要存档 / SHA-256(A4)\n${h}`});
  function plotWave(arr){let xy=arr.map((n,i)=>`${5+i*6.1},${35-n*.20}`).join(' ');return `<svg viewBox="0 0 102 70" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="102" y1="35" y2="35" stroke="currentColor" stroke-width=".7" opacity=".25"/><polyline points="${xy}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
@@ -112,16 +123,17 @@
   if(same){complete('reels');return}
   resultMessage=`采样不一致 :: A${state.waveA+1} ≠ B${state.waveB+1}`;sfx.reject();reboot();let el=document.getElementById('wave-digest');if(el)el.textContent=`SHA(A) ${hashA.slice(0,24)}… / SHA(B) ${hashB.slice(0,24)}…`
  }
- /* 转盘：字符须逐个触发显示；纸上编号只是转写顺序，转盘自己的次序才是读法。 */
- const maiLetters=['B','D','R','A','W','E','R','E','I','G','H','T','H'];
+ /* 转盘：字符须逐个触发显示；纸上只剩一张阻抗表，转盘自己的次序要靠它读。 */
+ const maiLetters=['E','D','G','R','A','I','B','T','H','E','R','H','W'];
+ const maiOhm=[3.3,0.68,15,4.7,1.5,10,0.47,33,47,6.8,1.0,22,2.2];
  function renderMai(){const N=maiLetters.length,r=112,ox=150,oy=150,padPx=48;
   const revealed=new Set(state.maiTapped||[]);
-  let pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N;const x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2;return `<button class="mai-pad" data-mai="${i+1}" style="left:${x}px;top:${y}px;width:${padPx}px;height:${padPx}px" aria-label="触点 ${i+1}"><small>${i+1}</small>${revealed.has(i+1)?c:'·'}</button>`}).join('');
+  let pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N;const x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2;return `<button class="mai-pad" data-mai="${i+1}" style="left:${x}px;top:${y}px;width:${padPx}px;height:${padPx}px" aria-label="触点 ${i+1}"><small>${i+1} · ${maiOhm[i]}k</small>${revealed.has(i+1)?c:'·'}</button>`}).join('');
   const taps=state.maiTapped||[];
   return `<div class="mai-scene reveal"><div class="mai-round">${pads}<div class="mai-center">13 CHANNELS</div></div><div class="mai-info"><div class="mai-taps">${taps.length?taps.map(n=>`<span class="tap-number">${n}</span>`).join(''):'<span class="tiny">触发触点以显示字符</span>'}</div>${taps.length>=N?`<div class="terminal-block">TRANSCRIPT :: ${esc(taps.map(n=>maiLetters[n-1]).join(''))}</div><p><button class="btn" data-act="mai-reset">清空转写</button></p>`:(taps.length?'<p><button class="btn" data-act="mai-reset">清空转写</button></p>':'')}</div></div>`}
- const arcaeaTarget='MIRRORYEAR1986';const arcaeaActive=['sky','floor','sky','floor','floor','sky','sky','floor','sky','floor','floor','sky','floor','sky'];
+ const arcaeaTarget='MIRRORYEAR1986';const arcBeats=[9,4,12,2,14,7,10,5,1,13,6,11,3,8];const arcaeaActive=['sky','floor','sky','floor','floor','sky','sky','floor','sky','floor','floor','sky','floor','sky'];
  const otherNoise=['Q','V','Z','K','T','A','7','G','L','P','W','R','5','H'];
- function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i];let s=on==='sky'?arcaeaTarget[i]:otherNoise[i],f=on==='floor'?arcaeaTarget[i]:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}return `<div class="arcaea-board reveal"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div></div>`+term('SECOND LAYER / CIPHER\n\nFPVCC NCVTI MKBTC GGIDK TMLGD VP\n\n[印章] KEY: 亮格连读所得')}
+ function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i],ch=arcaeaTarget[arcBeats[i]-1];let s=on==='sky'?ch:otherNoise[i],f=on==='floor'?ch:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}const stamps=arcBeats.map(b=>`<div class="arc-cell arc-stamp"><small>${b}</small></div>`).join('');return `<div class="arcaea-board reveal"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div><div class="lane-title"><span>时标 / STAMP</span><span>誊录顺序未整理</span></div><div class="arc-row">${stamps}</div></div>`+term('SECOND LAYER / CIPHER\n\nFPVCC NCVTI MKBTC GGIDK TMLGD VP\n\n[印章] KEY: 亮格连读所得')}
  function hammingSyndrome(bits){const b=[...bits].map(Number),xor=indices=>indices.reduce((r,i)=>r^b[i-1],0);let s1=xor([1,3,5,7]),s2=xor([2,3,6,7]),s4=xor([4,5,6,7]);return {s1,s2,s4}}
  const pullCards=[
   {id:'U-11',char:'ARCHIVE / 01',star:2},{id:'U-42',char:'ARCHIVE / 02',star:2},
@@ -288,7 +300,7 @@ REEL-A / REEL-B：共享采样
   '042':'第 042 号卷宗。数字化失败。分发残片五段，注销四段；ARCHIVE-DEPT 一段的注销申请从未提出。分发无法撤回。',
   'BOOT':'引导日志只写入档案系统。它不解释自己。'
  };
- function emitConsole(){const style='color:#b23a2e;font-family:monospace;font-size:12px';console.log('%cARCHIVE-00 :: 17 FILES RESTORED',style);console.log('%cTRANSFER LOG :: VOL. 042 :: SEGMENTS IN ORDER: SYS-LOG / ROBOT / ERR-PAGE / INDEX',style);console.log('%cSEGMENT SYS-LOG :: 54 48 45 20',style);console.log('%cLINE-A :: B-SIDE PLAYBACK 7 4 9 12 1 8 5 13 3 11 2 10 6 :: REEL UNUSABLE',style);console.log('%c系统不回答没有编号的问题。',style)}
+ function emitConsole(){const style='color:#b23a2e;font-family:monospace;font-size:12px';console.log('%cARCHIVE-00 :: 20 FILES RESTORED',style);console.log('%cTRANSFER LOG :: VOL. 042 :: SEGMENTS IN ORDER: SYS-LOG / ROBOT / ERR-PAGE / INDEX',style);console.log('%cSEGMENT SYS-LOG :: 54 48 45 20',style);console.log('%cLINE-A :: B-SIDE PLAYBACK 7 4 9 12 1 8 5 13 3 11 2 10 6 :: REEL UNUSABLE',style);console.log('%c系统不回答没有编号的问题。',style)}
  window.ZephyrDev={getProgress:()=>({stepUnlocked:state.stepUnlocked,current:state.current,solved:{...state.solved}}),getManual:()=>D.manual,getAnnex:()=>D.annex,query:id=>loreMap[id]||'INDEX NOT FOUND'};
  /* ===== 页面启动 ===== */
  function init(){
