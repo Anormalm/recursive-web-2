@@ -284,7 +284,7 @@ REEL-A / REEL-B：共享采样
    if(dclose)dclose.addEventListener('click',closePanel);
    return}
   const fb=document.getElementById('finale-body');
-  if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();wire(fb);return}
+  if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();wire(fb);animateIn(fb);return}
  }
  readSealFromUrl();init();
 })();
