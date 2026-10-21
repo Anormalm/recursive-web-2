@@ -84,12 +84,5 @@ window.ZEPHYR_DATA = (() => {
  masterkey:{speaker:'林澄 / 最后一次录音',text:'“复印件看久了会忘记：钥匙从来不在服务器里。封条上印着它——把数字扔掉，字母留下。”'},
  judgment:{speaker:'最后一条录音 / 许闻舟',text:'“你的最后一件事：把六行写完。别忘了那两枚印章，和 2015 年的那一对名字。”\n——磁带转完没有停。噪声里还有半句话，被人从中间剪断：“六行写完，卷宗闭合。闭合的时候，登记进去的是——”'}
  };
- const finale={
- preface:'CASE Z-00 CLOSED :: 身份：许静仪 · 合成于 2025-04-03 13:30 :: SOURCE ROOT: CORE-17',
- letters:[
-  '“我想听原件。”——林澄 / 最后一次录音',
-  '“账号上的 MISSING 是一种权限状态，不是一个人的命运。”——许闻舟'
- ]
- };
- return {days,manual,annex,steps,records,interludes,finale};
+  return {days,manual,annex,steps,records,interludes};
 })();
