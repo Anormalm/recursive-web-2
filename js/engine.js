@@ -188,6 +188,24 @@
  function closePanel(){panelKind=null;panelEvId=null;
   const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
   if(drawer)drawer.classList.remove('open');if(backdrop)backdrop.classList.remove('open')}
+ /* ===== 开场交接单（首次到访显示一次） ===== */
+ function introBody(){return `<div class="intro-letter" role="dialog" aria-label="内部交接单">
+  <div class="intro-head">南屿市档案馆 · 内部交接单 · 不随卷宗归档</div>
+  <h2 class="intro-title">致接手这张工作台的人</h2>
+  <p>你不是第一个坐在这里的人。在你之前有两位。一位叫林澄，修复组，今年三月起没有再来；另一位叫许闻舟，项目负责人，九月二十日办完了离职手续。人事科的说法，前者「未再到岗」，后者「因个人原因」。这两句话都写进了公告栏，也都不是实话。实话是：从他们先后离开的那天起，这张灯箱工作台就再没有人关过电源。它一直亮着，玻璃是热的，像在等下一个人。</p>
+  <p>你接手的工作，说起来只有一句话：把剩下的卷宗修完。泽风计划前后接收了邮电系统移交的一百三十七卷材料，纸上年份横跨八十年。有些纸摸上去比看上去更老，有些纸比它自己声称的年份更新——你不必先分辨哪一种更可疑，校验器会替你做判断。你真正要记的只有三条守则，前任们用不同笔迹写过很多遍：一、修复永远以原件为准，副本只算参考；二、印章会撒谎，纸不会；三、遇到没有签发栏的表格，先问它是谁写的，再看它写了什么。</p>
+  <p>进度自己会记，你不必数。到第几天，就修第几天的卷。修完一卷，系统会替你把它合上——它做这件事的时候比你利落得多，利落得几乎不像在归档，倒像在收口。</p>
+  <p>还有一件事，写在这里而不是公告里：这个系统偶尔会自己动。去年四月，平台在没有任何人工操作的午后自行做过一次全库维护，只用了四分钟；技术组查了三遍，当班登记栏是空的。今年春天，又有人调阅到索引之外的卷宗。这些事在日志里各有各的学名。你可以管它叫任何名字——只是别当着它的面叫。</p>
+  <p>如果你修得够久，会开始注意到一些不属于任何单卷的东西：一份三个年代共用同一处笔误的档案，一行先于它所在纸张的墨迹，一个在持有人栏出现之前就被登记过的名字。到那时你自然会想问：修档案的到底是人，还是档案在借人的手修自己。这个问题没有写进任何一份工序单。前任两位都没有来得及把答案留下来——或者说，留下的方式你暂时还读不到。</p>
+  <p>好了。灯箱是热的，手套在左手第一格抽屉，废纸篓每天清空，但从来不是空的。修完最后一卷的时候，你会明白这张交接单为什么没有编号：<b>没有编号的东西，系统写不进去。</b></p>
+  <p class="intro-sign">祝你手稳。</p>
+  <p class="intro-actions"><button class="btn" data-act="dismiss-intro">接手工作台</button></p>
+ </div>`}
+ function showIntro(){
+  const veil=document.createElement('div');veil.className='intro-veil';veil.innerHTML=introBody();
+  document.body.appendChild(veil);wire(veil);
+  window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>veil.classList.add('on')));
+ }
  /* ===== 结案报告页 ===== */
  function finaleBody(){if(!released(D.steps[stepCount-1].day)||state.stepUnlocked<stepCount)return `<div class="notice">该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。</div><p><a href="index.html">回到阅览</a></p>`;
   if(!state.capstoneOk){return `<div class="k">Z-00 · 结案档案 · 2026</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" autocomplete="off" spellcheck="false" placeholder="拆封口令"/><button type="submit" class="btn">拆封</button></form></div>${renderFeedback()}`}
@@ -212,6 +230,7 @@ REEL-A / REEL-B：共享采样
   case 'audio':{sfx.toggle();showToast(audioMuted?'系统提示音已关闭':'系统提示音已开启');renderPanel();break}
   case 'import-save':{try{let txt=document.getElementById('save-import')?.value||'',obj=decodeSave(txt);if(obj.v!==1||!Number.isInteger(obj.stepUnlocked)||obj.stepUnlocked<0||obj.stepUnlocked>stepCount)throw Error('记录版本或完成章节数有误');if(!window.confirm('确定将这份存档覆盖本机当前进度和笔记吗？'))break;state={...defaultState(),...obj,current:Math.max(0,Math.min(stepCount,obj.current||0))};resultMessage='';save();reboot();renderPanel();showToast('存档已导入');}catch(err){showToast('存档格式无效，请重新复制完整内容')}break}
   case 'reset':reset();break;
+  case 'dismiss-intro':{state.introDismissed=true;save();const v=document.querySelector('.intro-veil');if(v){v.classList.remove('on');window.setTimeout(()=>v.remove(),320)}break}
   default:break
  }}));
  scope.querySelectorAll('[data-wave]').forEach(el=>el.addEventListener('click',()=>{const [side,n]=el.dataset.wave.split(':');state[side==='A'?'waveA':'waveB']=Number(n);sfx.blip(430,.05,'sine',.012);save();reboot()}));
@@ -283,6 +302,7 @@ REEL-A / REEL-B：共享采样
    if(backdrop)backdrop.addEventListener('click',closePanel);
    const dclose=document.getElementById('drawer-close');
    if(dclose)dclose.addEventListener('click',closePanel);
+   if(!state.introDismissed)showIntro();
    return}
   const fb=document.getElementById('finale-body');
   if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();wire(fb);animateIn(fb);return}
