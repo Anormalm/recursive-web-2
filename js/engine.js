@@ -192,10 +192,11 @@
  function finaleBody(){if(!released(D.steps[stepCount-1].day)||state.stepUnlocked<stepCount)return `<div class="notice">该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。</div><p><a href="index.html">回到阅览</a></p>`;
   if(!state.capstoneOk){return `<div class="k">Z-00 · 结案档案 · 2026</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" autocomplete="off" spellcheck="false" placeholder="拆封口令"/><button type="submit" class="btn">拆封</button></form></div>${renderFeedback()}`}
   return `<div class="k">Z-00 · 结案档案 · 2026</div><h2 class="finale-h">第零号证人从未出生。</h2><div class="terminal-block">CASE Z-00 / CLOSED
-身份：许静仪 · 合成于 2026
-SOURCE ROOT: CORE-17
+身份：许静仪 · 合成于 2025-04-03 13:30 · 2026 年登记为补录
+SOURCE ROOT: CORE-17 · 三个年代，同一生成根
 REEL-A / REEL-B：共享采样
-独立评估：记录不全</div><p class="muted">“我想听原件。”——林澄 / 最后一次录音</p><blockquote class="interlude"><p class="k">许闻舟 / 未寄出的信</p><p>“我没失踪。我只是被从他们的系统里删掉了。<br><br>只是希望下一位看到它的人，会去看原件。”</p></blockquote><p><a href="index.html">回看卷宗</a> · <a href="catalog.html">馆藏目录</a> · <a href="log.html">修复日志</a></p>`}
+八组脉冲 / 1946：登记在持有人栏存在之前
+独立评估：记录不全</div><p class="muted">“我想听原件。”——林澄 / 最后一次录音</p><blockquote class="interlude"><p class="k">许闻舟 / 未寄出的信</p><p>“我没失踪。我只是被从他们的系统里删掉了。<br><br>只是希望下一位看到它的人，会去看原件。”</p></blockquote><p class="tiny">取件点的那张纸仍在原处。它是全案唯一没有被系统誊录过的材料——你把它拿在手里，才走到了这一页。</p><p><a href="index.html">回看卷宗</a> · <a href="catalog.html">馆藏目录</a> · <a href="log.html">修复日志</a></p><p class="tiny" style="margin-top:18px">——本页由系统生成。生成时间：拆封这一刻。</p>`}
  /* ===== 事件绑定 ===== */
  function wire(scope){scope.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',async e=>{let action=el.dataset.act;switch(action){
   case 'panel':openPanel(el.dataset.panel);break;
