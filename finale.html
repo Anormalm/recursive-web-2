@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>try{if(localStorage.getItem('zephyr-lang')==='en')document.documentElement.dataset.lang='en'}catch(e){}</script>
   <meta name="theme-color" content="#2b2014" />
   <meta name="robots" content="noindex" />
-  <title>结案报告 Z-00 · 泽风计划</title>
+  <title data-en="Closing Report Z-00 · Project Zephyr">结案报告 Z-00 · 泽风计划</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="assets/sigil.svg" />
   <script defer src="config.js"></script>
   <script defer src="data.js"></script>
+  <script defer src="js/i18n.js"></script>
   <script defer src="js/engine.js"></script>
   <!-- 转录备注 018：这一页不是给所有人的。它只给把二十卷都读完的人。 -->
 </head>
 <body>
  <header class="top">
+  <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
   <div class="top-inner">
-   <a class="brand" href="index.html">南屿市档案馆<small>泽风计划</small></a>
+   <a class="brand" href="index.html"><span class="i18n-zh">南屿市档案馆<small>泽风计划</small></span><span class="i18n-en">NANYU MUNICIPAL ARCHIVES<small>PROJECT ZEPHYR</small></span></a>
    <nav class="top-nav">
-    <a href="index.html">阅览</a>
-    <a href="catalog.html">目录</a>
+    <a href="index.html"><span class="i18n-zh">阅览</span><span class="i18n-en">Reading</span></a>
+    <a href="catalog.html"><span class="i18n-zh">目录</span><span class="i18n-en">Catalog</span></a>
    </nav>
   </div>
  </header>
@@ -29,8 +32,7 @@
   </div>
  </main>
  <footer>
-  南屿市档案馆 版权所有 · 泽风计划（2024—2026）<br />
-  建议使用 1024×768 分辨率浏览本站
+  <span class="i18n-zh">南屿市档案馆 版权所有 · 泽风计划（2024—2026）<br />建议使用 1024×768 分辨率浏览本站</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026)<br />Best viewed at 1024×768</span>
  </footer>
 </body>
 </html>

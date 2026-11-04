@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>try{if(localStorage.getItem('zephyr-lang')==='en')document.documentElement.dataset.lang='en'}catch(e){}</script>
   <meta name="theme-color" content="#2b2014" />
-  <meta name="description" content="南屿市档案馆 · 泽风计划：历史无线电维护档案数字化项目。在线阅览与修复校验。" />
-  <title>泽风计划 · 在线阅览 — 南屿市档案馆</title>
+  <meta name="description" content="南屿市档案馆 · 泽风计划：历史无线电维护档案数字化项目。在线阅览与修复校验。" data-en="Nanyu Municipal Archives · Project Zephyr: digitized historic radio maintenance archives. Online reading and verification." />
+  <title data-en="PROJECT ZEPHYR · Online Reading — Nanyu Municipal Archives">泽风计划 · 在线阅览 — 南屿市档案馆</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="assets/sigil.svg" />
   <script defer src="config.js"></script>
   <script defer src="data.js"></script>
+  <script defer src="js/i18n.js"></script>
   <script defer src="js/engine.js"></script>
   <!-- 转录备注 004：本页在恢复时缺少签发栏。签发人身份未确立。 -->
 </head>
@@ -19,18 +21,19 @@
  <!-- 恢复日志 · 残片三：原始登记只覆盖设备。任何人员条目均为后期补录。 -->
 
  <header class="top">
+  <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
   <div class="top-inner">
-   <a class="brand" href="index.html">南屿市档案馆<small>泽风计划</small></a>
+   <a class="brand" href="index.html"><span class="i18n-zh">南屿市档案馆<small>泽风计划</small></span><span class="i18n-en">NANYU MUNICIPAL ARCHIVES<small>PROJECT ZEPHYR</small></span></a>
    <nav class="top-nav">
-    <a href="catalog.html">目录</a>
-    <button data-act="panel" data-panel="evidence">证物</button>
-    <button data-act="panel" data-panel="notes">工作台</button>
-    <a href="log.html">日志</a>
-    <a id="finale-link" href="finale.html" hidden>结案</a>
+    <a href="catalog.html"><span class="i18n-zh">目录</span><span class="i18n-en">Catalog</span></a>
+    <button data-act="panel" data-panel="evidence"><span class="i18n-zh">证物</span><span class="i18n-en">Evidence</span></button>
+    <button data-act="panel" data-panel="notes"><span class="i18n-zh">工作台</span><span class="i18n-en">Workbench</span></button>
+    <a href="log.html"><span class="i18n-zh">日志</span><span class="i18n-en">Log</span></a>
+    <a id="finale-link" href="finale.html" hidden><span class="i18n-zh">结案</span><span class="i18n-en">Closing</span></a>
    </nav>
   </div>
   <div class="progress-track">
-   <div class="progress-meta"><span>数字化修复进度</span><span id="progress-count">第一日 · 灰尘与墨</span></div>
+   <div class="progress-meta"><span><span class="i18n-zh">数字化修复进度</span><span class="i18n-en">DIGITIZATION PROGRESS</span></span><span id="progress-count">第一日 · 灰尘与墨</span></div>
    <div class="progress"><i id="progress-bar"></i></div>
   </div>
  </header>
@@ -42,24 +45,23 @@
  </main>
 
  <div id="backdrop"></div>
- <aside id="drawer" aria-label="侧栏面板">
+ <aside id="drawer" aria-label="侧栏面板 / Side panel">
   <div class="drawer-head">
    <span id="drawer-title">面板</span>
-   <button class="drawer-close" id="drawer-close" aria-label="关闭">×</button>
+   <button class="drawer-close" id="drawer-close" aria-label="关闭 / Close">×</button>
   </div>
   <div id="drawer-body"></div>
  </aside>
 
  <footer>
-  南屿市档案馆 版权所有 · 泽风计划（2024—2026） · 本站自 2026 年 10 月起转为静态存档<br />
-  建议使用 1024×768 分辨率浏览本站
+  <span class="i18n-zh">南屿市档案馆 版权所有 · 泽风计划（2024—2026） · 本站自 2026 年 10 月起转为静态存档<br />建议使用 1024×768 分辨率浏览本站</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026) · This site has been a static archive since October 2026<br />Best viewed at 1024×768</span>
  </footer>
 
  <div id="sys-note" aria-hidden="true" hidden>
-   SYS/INTERNAL :: NOT FOR DISPATCH
-   第 17 号构建源不接受直接查询。
+   SYS/INTERNAL :: NOT FOR DISPATCH<br />
+   <span class="i18n-zh">第 17 号构建源不接受直接查询。</span><span class="i18n-en">Build source No. 17 accepts no direct queries.</span><br />
    存档副本：VmVyaWZpZWQgb25jZSwgY2hlY2tlZCB0d2ljZS4=
  </div>
- <noscript>在线阅览功能需要启用 JavaScript。目录与日志浏览不受影响。</noscript>
+ <noscript><span class="i18n-zh">在线阅览功能需要启用 JavaScript。目录与日志浏览不受影响。</span><span class="i18n-en">Online reading requires JavaScript. The catalog and log remain available without it.</span></noscript>
 </body>
 </html>

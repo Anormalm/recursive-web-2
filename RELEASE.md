@@ -34,3 +34,13 @@ Fact-verification log (public sources, at least two each; no disasters or death 
 
 Live-player compatibility: the three new steps insert at indexes 10/13/17, all beyond the current player frontier (day 2), so no existing save is invalidated. `catalog.html` now lists 20 volumes; the console sign-off line and interlude-adjacent copy were updated to match.
 
+
+## November 4 bilingual interface pass (zh + EN toggle)
+
+The site is now bilingual with a language toggle pinned to the top-right of every page. Scope rule: **the interface and narrative framing are bilingual; originals are not translated** (in-fiction: the reading system offers two languages, the records do not). This keeps every puzzle mechanic intact — the 1946 workbook and B-cabinet annex book ciphers index into their original text, and the 17 interludes' first-hanzi acrostic stays discoverable exactly as before.
+
+- New `js/i18n.js` (no dependencies): toggle wiring, `<title>`/meta swap, `<html lang>` update. A three-line inline script in each page's `<head>` sets `<html data-lang>` before first paint.
+- Static pages (index/catalog/log/404/finale chrome, the full project log, catalog intro) use paired `.i18n-zh`/`.i18n-en` spans hidden by CSS; engine-rendered strings use an inline `zt(zh, en)` helper with Chinese canonical.
+- Preference persists in `localStorage['zephyr-lang']` (separate from `zephyr-zero-arg-v1`, so progress is untouched by switching). Default remains Chinese; switching reloads the page.
+- Not translated by design: step titles and catalog row titles (they describe the original documents), all material terminal blocks, records, interludes, the manual and annex, verdict claims, and the finale report body. The intro handover letter renders in English as an explicitly marked translated copy.
+- `data.js` gains only a `daysEn` map for the progress bar. No answer, hash, schedule, or state changes anywhere.

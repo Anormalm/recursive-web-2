@@ -45,6 +45,19 @@ test('acrostic integrity: exactly 17 interludes; first hanzi in reading order se
  assert.equal(phrase.length,17);
  assert.equal(await t.sha256Text(t.norm(phrase)),t.finaleCapstoneHash);
 });
+test('bilingual wiring: toggle and head bootstrap on every page, balanced spans, en day labels',()=>{
+ const {D}=game();
+ const pages=['index.html','catalog.html','log.html','404.html','finale.html'];
+ for(const p of pages){const h=readFileSync(new URL('../'+p,import.meta.url),'utf8');
+  assert.ok(h.includes('data-lang-toggle'),p+' carries the language toggle');
+  assert.ok(h.includes("localStorage.getItem('zephyr-lang')"),p+' has the pre-paint language bootstrap');
+  assert.ok(h.includes('js/i18n.js'),p+' loads the toggle script');
+  const zhN=(h.match(/class="i18n-zh"/g)||[]).length,enN=(h.match(/class="i18n-en"/g)||[]).length;
+  assert.ok(zhN>0,p+' has bilingual chrome');
+  assert.equal(zhN,enN,p+' has balanced zh/en spans');
+ }
+ assert.ok(D.daysEn&&Object.keys(D.daysEn).length===6,'six English day labels');
+});
 test('new steps are wired: chain, records, assets, typed hashes',()=>{
  const {t,D}=game();
  const ids=D.steps.map(s=>s.id);

@@ -1,6 +1,8 @@
 /* ZEPHYR · 馆藏数据：卷宗著录、来源索引与调阅步骤。 */
 window.ZEPHYR_DATA = (() => {
  const days = {1:'第一日 · 灰尘与墨',2:'第二日 · 回声',3:'第三日 · 触点',4:'第四日 · 空白页',5:'第五日 · B 柜',6:'第六日 · 第零号证人'};
+ // 界面用英文日标（仅进度栏显示；卷面材料不变）。
+ const daysEn = {1:'Day 1 · Dust and Ink',2:'Day 2 · Echoes',3:'Day 3 · Contacts',4:'Day 4 · Blank Pages',5:'Day 5 · Cabinet B',6:'Day 6 · Witness Zero'};
  const manual = [
  '凌晨的雨沿着铁皮棚滴下来，许多收音机都受了潮。',
  '值班员说，隔壁的钟走得比这里快了四分钟。',
@@ -90,5 +92,5 @@ window.ZEPHYR_DATA = (() => {
  masterkey:{speaker:'林澄 / 最后一次录音',text:'“复印件看久了会忘记：钥匙从来不在服务器里。封条上印着它——把数字扔掉，字母留下。”'},
  judgment:{speaker:'最后一条录音 / 许闻舟',text:'“你的最后一件事：把六行写完。别忘了那两枚印章，和 2015 年的那一对名字。”\n——磁带转完没有停。噪声里还有半句话，被人从中间剪断：“六行写完，卷宗闭合。闭合的时候，登记进去的是——”'}
  };
-  return {days,manual,annex,steps,records,interludes};
+  return {days,daysEn,manual,annex,steps,records,interludes};
 })();
