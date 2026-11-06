@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>try{if(localStorage.getItem('zephyr-lang')==='en')document.documentElement.dataset.lang='en'}catch(e){}</script>
+  <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
   <meta name="theme-color" content="#2b2014" />
   <meta name="description" content="南屿市档案馆 · 泽风计划：历史无线电维护档案数字化项目。在线阅览与修复校验。" data-en="Nanyu Municipal Archives · Project Zephyr: digitized historic radio maintenance archives. Online reading and verification." />
   <title data-en="PROJECT ZEPHYR · Online Reading — Nanyu Municipal Archives">泽风计划 · 在线阅览 — 南屿市档案馆</title>
@@ -40,12 +40,13 @@
 
  <main>
   <div class="shell">
+   <p class="play-notice"><span class="i18n-zh">开始前：中文原件与文字谜题不随界面翻译。需要外部检索、地图及音频分析工具；完整流程包括线下实体二维码取件，不能仅远程完成。</span><span class="i18n-en">Before starting: Chinese originals and text puzzles do not change with the interface language. External research, maps and audio-analysis tools are needed. Completion includes a physical QR pickup, so remote-only play cannot finish the chain.</span></p>
    <div id="reader" data-app></div>
   </div>
  </main>
 
  <div id="backdrop"></div>
- <aside id="drawer" aria-label="侧栏面板 / Side panel">
+ <aside id="drawer" aria-labelledby="drawer-title" aria-hidden="true" inert>
   <div class="drawer-head">
    <span id="drawer-title">面板</span>
    <button class="drawer-close" id="drawer-close" aria-label="关闭 / Close">×</button>

@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
+  <base href="/" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>try{if(localStorage.getItem('zephyr-lang')==='en')document.documentElement.dataset.lang='en'}catch(e){}</script>
+  <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
   <meta name="theme-color" content="#2b2014" />
   <meta name="robots" content="noindex" />
   <title data-en="Page Not Found · Nanyu Municipal Archives">未找到该页 · 南屿市档案馆</title>
@@ -20,7 +21,7 @@
     <h1 class="err-code"><span class="i18n-zh">未找到该页</span><span class="i18n-en">Page not found</span></h1>
     <p class="err-line"><span class="i18n-zh">请求的卷宗不在索引内。</span><span class="i18n-en">The requested volume is not in the index.</span></p>
     <p class="err-meta"><span class="i18n-zh">REQUEST LOGGED · 2026-B · 未附调阅权限<br />检索不到的档号不属于本馆目录。</span><span class="i18n-en">REQUEST LOGGED · 2026-B · NO RETRIEVAL PERMISSION ATTACHED<br />File numbers that return nothing from the search are not part of this catalog.</span></p>
-    <a class="err-home" href="/"><span class="i18n-zh">← 返回首页</span><span class="i18n-en">← Back to the front page</span></a>
+    <a class="err-home" href="index.html"><span class="i18n-zh">← 返回首页</span><span class="i18n-en">← Back to the front page</span></a>
   </div>
 </body>
 </html>

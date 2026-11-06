@@ -134,7 +134,7 @@ html[data-lang="en"] .i18n-zh{display:none}
 .lang-toggle{
   position:absolute;right:14px;top:12px;z-index:6;
   font-family:var(--sans);font-size:11px;letter-spacing:.08em;
-  color:var(--navy);padding:2px 10px;cursor:pointer;
+  color:var(--navy);padding:2px 10px;min-height:32px;cursor:pointer;
   background-color:var(--paper);background-image:var(--grain-soft);
   border:1px solid var(--paper-edge);
   box-shadow:0 1px 0 rgba(20,12,4,.4);
@@ -246,6 +246,26 @@ html[data-lang="en"] .i18n-zh{display:none}
   background:rgba(226,210,166,.55);rotate:1.6deg;
 }
 
+/* 工作提示与存储故障：留在纸面上的状态，不遮挡输入或依赖短暂浮层 */
+.play-notice,.storage-notice,.recovery-draft{
+  margin:14px 0;padding:10px 12px;font-size:12px;line-height:1.8;
+  color:var(--ink-soft);background-color:var(--paper-2);background-image:var(--grain-soft);
+  border:1px solid var(--paper-edge);overflow-wrap:anywhere;
+}
+.play-notice{border-left:3px solid var(--navy)}
+.storage-notice{border-left:3px solid var(--stamp);background-color:var(--paper-hi)}
+.play-notice p,.storage-notice p,.recovery-draft p{margin:6px 0}
+.play-notice p:first-child,.storage-notice p:first-child,.recovery-draft p:first-child{margin-top:0}
+.play-notice p:last-child,.storage-notice p:last-child,.recovery-draft p:last-child{margin-bottom:0}
+.recovery-draft label{display:block;font-weight:bold;color:var(--ink);margin-bottom:6px}
+.recovery-draft textarea{
+  display:block;width:100%;max-width:100%;min-height:120px;resize:vertical;
+  font:inherit;font-size:13px;line-height:1.8;padding:8px;
+  border:1px solid var(--line);background:var(--paper-hi);color:var(--ink);
+}
+.recovery-draft textarea:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.recovery-draft .btn{margin-top:8px}
+
 /* ===== 证物照片：相框 + Ken Burns 慢漂移 + 滚动视差（渐进增强） ===== */
 .evidence-photo{
   position:relative;overflow:hidden;margin:26px auto;max-width:520px;
@@ -305,10 +325,21 @@ html[data-lang="en"] .i18n-zh{display:none}
   border:1px dashed var(--hair);background-color:var(--paper-2);padding:10px 12px;margin-top:12px;
 }
 
-/* 转盘：黄铜面板 + 电木键 */
-.mai-scene{margin:20px 0;display:flex;justify-content:center}
+/* 转盘：黄铜面板 + 电木键；窄屏只滚动转盘，转写保持正常文档流 */
+.mai-scene{margin:20px 0;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.mai-scroll,.arc-scroll{
+  width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;
+  padding:4px 2px 10px;overscroll-behavior-x:contain;
+  scrollbar-width:auto;scrollbar-color:var(--muted) var(--paper-2);
+}
+.mai-scroll::-webkit-scrollbar,.arc-scroll::-webkit-scrollbar{height:12px}
+.mai-scroll::-webkit-scrollbar-track,.arc-scroll::-webkit-scrollbar-track{background:var(--paper-2)}
+.mai-scroll::-webkit-scrollbar-thumb,.arc-scroll::-webkit-scrollbar-thumb{
+  background:var(--muted);border:2px solid var(--paper-2);border-radius:2px;
+}
+.scroll-hint,.mai-scroll-hint,.arc-scroll-hint{font-size:12px;color:var(--muted);margin:6px 0;overflow-wrap:anywhere}
 .mai-round{
-  position:relative;width:300px;height:300px;max-width:100%;flex:none;
+  position:relative;width:100%;min-width:300px;max-width:300px;height:auto;aspect-ratio:1;flex:none;margin:0 auto;
   border-radius:50%;border:6px solid #241a0e;
   background:radial-gradient(circle at 42% 36%, #c9a86b, #8a6a3e 68%, #5d4426);
   box-shadow:inset 0 0 24px rgba(20,12,4,.5),0 6px 18px rgba(40,28,12,.35);
@@ -324,11 +355,13 @@ html[data-lang="en"] .i18n-zh{display:none}
 .mai-pad:active{transform:scale(0.94)}
 .mai-pad.blink{animation:tapblink .16s ease}
 .mai-center{
-  position:absolute;inset:104px;display:flex;align-items:center;justify-content:center;text-align:center;
+  position:absolute;inset:34.666667%;display:flex;align-items:center;justify-content:center;text-align:center;
   font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   background-color:var(--paper);border-radius:50%;box-shadow:inset 0 0 8px rgba(60,45,20,.3);
 }
-.mai-info{display:none}
+.mai-info{display:block;width:100%;min-width:0;margin-top:10px}
+.mai-info p{margin-top:10px}
+.mai-info .terminal-block{margin:12px 0;overflow-wrap:anywhere}
 .mai-taps{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
 .tap-number{
   min-width:30px;height:30px;border:1px solid #191309;display:flex;align-items:center;justify-content:center;
@@ -336,10 +369,11 @@ html[data-lang="en"] .i18n-zh{display:none}
   background:linear-gradient(#3d3122,#2c2318);
 }
 
-/* 双轨：磁带条 */
-.arcaea-board{margin:20px 0}
-.lane-title{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin:12px 0 6px}
-.arc-row{display:grid;grid-template-columns:repeat(14,1fr);gap:4px}
+/* 双轨：磁带条；轨道与时标共用一个可滚动的对齐纸面 */
+.arc-scroll{margin:20px 0}
+.arcaea-board{min-width:370px;margin:0}
+.lane-title{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin:12px 0 6px}
+.arc-row{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
 .arc-cell{
   aspect-ratio:3/4;border:1px solid #191309;display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:13px;color:#a08a62;
@@ -521,6 +555,9 @@ footer{border:none;background:none;padding:14px 16px 44px;text-align:center;font
   transform:translateY(10px);transition:transform .32s var(--ease-out);
 }
 .intro-veil.on .intro-letter{transform:translateY(0)}
+.intro-language{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:14px;font-size:12px;color:var(--ink-soft)}
+.intro-language .lang-toggle{position:static;flex:none;letter-spacing:.08em}
+.intro-language label{font-size:12px}
 .intro-head{font-family:var(--mono);font-size:11px;color:var(--stamp);letter-spacing:.18em;border-bottom:1px dashed var(--hair);padding-bottom:8px;margin-bottom:14px}
 .intro-title{font-family:var(--kai);font-size:22px;color:var(--ink);margin:4px 0 16px;letter-spacing:.04em}
 .intro-letter p{font-size:14px;line-height:2;color:var(--ink);margin:0 0 14px;text-align:justify}
@@ -691,21 +728,22 @@ footer{border:none;background:none;padding:14px 16px 44px;text-align:center;font
 /* 窄屏：撤掉桌沿，灯箱全幅 */
 @media (max-width:700px){
   body{max-width:none;box-shadow:none}
+  .top-inner{padding-top:52px}
 }
 /* iOS 触屏：输入框不足 16px 会触发页面缩放；仅触屏放大到 16px */
 @media (pointer:coarse){
-  .answer-row input,.note-area{font-size:16px}
+  .answer-row input,.note-area,.recovery-draft textarea{font-size:16px}
 }
 @media (max-width:560px){
   .shell{padding:20px 12px 50px}
   .material{padding:18px 14px}
   .rec-title{font-size:16px}
   .lang-toggle{right:8px;top:8px;padding:2px 8px}
-  .brand{padding-right:42px}
+  .brand{display:block;padding:0;overflow-wrap:anywhere}
+  .brand small{display:block;margin-left:0;margin-top:2px}
+  html[data-lang="en"] .brand{font-size:16px;letter-spacing:.08em}
   .wave-track{grid-template-columns:repeat(4,1fr);gap:4px}
   .gacha-grid{grid-template-columns:repeat(4,1fr)}
-  .arc-row{gap:2px}
-  .arc-cell{font-size:11px}
   .answer-row{flex-direction:column}
   .btn{width:100%;text-align:center}
   .cat-row{grid-template-columns:1fr auto;grid-template-rows:auto auto}

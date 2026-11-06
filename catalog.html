@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>try{if(localStorage.getItem('zephyr-lang')==='en')document.documentElement.dataset.lang='en'}catch(e){}</script>
+  <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
   <meta name="theme-color" content="#2b2014" />
   <meta name="description" content="泽风计划馆藏目录：历史无线电维护档案数字化卷目一览。" data-en="Project Zephyr catalog: digitized volumes of the historic radio maintenance archives." />
   <title data-en="Catalog · Project Zephyr">馆藏目录 · 泽风计划</title>

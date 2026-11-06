@@ -20,7 +20,7 @@ Steps 6–8 were judged too easy and are hardened in place; three hard steps joi
 
 Hardened (discovery paths only): reel comparison now runs 12 fragments per side with three near-decoys that differ from a true pair by a single sample, so visual pairing fails by design and the digest comparison carries the step; the dial's paper note is now an impedance table, and the contacts read in ascending-impedance order; the dual-track board carries jumbled beat stamps 1–14, and the lit cells only spell the key in stamp order (the second-layer cipher and its key are untouched).
 
-New steps (typed, hash-verified like the rest; answers never appear in public files):
+New steps (typed, hash-verified like the rest; answer hashes and puzzle material are public, and source inspection may reveal solutions):
 
 - `noisewords` (WX-1986-034, day 3, after parity) — audio steganography. The unindexed `/evidence/` WAVs (registered in robots.txt) carry the material; REEL-B spells the answer in its spectrogram. The generator script lives offline in the GM kit only.
 - `newsclip` (WX-1986-044, day 4, after dropcoords) — historical OSINT. A torn newspaper clipping (`assets/press-1986.svg`) reports a 1986 Singapore civic opening without naming or dating it.
@@ -44,3 +44,30 @@ The site is now bilingual with a language toggle pinned to the top-right of ever
 - Preference persists in `localStorage['zephyr-lang']` (separate from `zephyr-zero-arg-v1`, so progress is untouched by switching). Default remains Chinese; switching reloads the page.
 - Not translated by design: step titles and catalog row titles (they describe the original documents), all material terminal blocks, records, interludes, the manual and annex, verdict claims, and the finale report body. The intro handover letter renders in English as an explicitly marked translated copy.
 - `data.js` gains only a `daysEn` map for the progress bar. No answer, hash, schedule, or state changes anywhere.
+
+## November 6 player-path and artifact repairs
+
+### Puzzle evidence and publication paths
+
+- Recursion's record now repeats the existing prior-key source clue before solving; the sealed audit record repeats the existing seal-to-key extraction method before solving. Neither addition provides an answer or decrypted text.
+- The dial record carries a separate, clearly dated erratum: use ascending measured impedance. Its original post-solve interlude is preserved verbatim, including the superseded numbered-order statement; the erratum explains the discrepancy instead of silently rewriting it.
+- `evidence/1946-workbook.txt` is now exactly `aWorkbook.body`: the canonical manual, its zero-based/reversed-binding instructions, and punctuation rule. Build checks reject source drift and generate the downloadable workbook from that same canonical body.
+- `robots.txt` explicitly registers the two existing `1986-reel-a.wav` and `1986-reel-b.wav` files. Source rules stay root-relative; generated rules use the configured publication base. Existing encoded/comment clue fragments are retained.
+- The build defaults to `--base=/`. The Pages workflow explicitly builds and verifies `--base=/recursive-web-2/`. Other hosting paths require a deliberate base change; the generated 404 never guesses URL depth. Its `<base>` precedes relative resource links and its home link is `index.html`; CORE-17 returns via `../index.html`.
+- Only the existing explicit player manifest is copied. Post-build verification checks the exact artifact tree and bytes, including generated files, and rejects `tests`, `scripts`, `RELEASE.md`, or `gm` anywhere in that tree. Do not upload the repository root. Robots exclusion is a puzzle discovery mechanism, not access control.
+
+### Coordinated engine/UI repair scope
+
+The approved scope also includes guarded snapshot writes and storage/foreground adoption; reset/import replacement and async invalidation; an in-memory warning and export path when storage is denied; live note exports and recoverable drafts; modal and widget/input focus retention; the intro's delegated language toggle and URL fallback; and prerequisite guards. The responsive scope is a 300px minimum, a local dial scroller, and aligned tracks. These items require their own engine/browser checks; this artifact note does not certify them as passed.
+
+Save guarding can reject sequential stale writes; it is not an atomic lock against truly simultaneous tab writes. Blocked-storage progress remains in memory until the player exports it, and cannot be claimed durable merely because a storage attempt was made. All client-clock, editable-save, publicly readable source/hash and historical exposure limitations above still apply. The canonical manual, annex, all 17 original interludes, answers/hashes, 20-step order, and production release configuration are not changed by these repairs.
+
+### Local verification and live follow-up
+
+The coordinated local pass passed 23 Node tests, including stale-tab protection, reset adoption, reset-confirmation conflict, async validation after replacement, refreshed exports, legacy normalization, blocked-storage QR retention, and root/project artifact exclusions. Fresh player-only builds passed verification. Comparison against revision `2a68107` confirmed byte-identical answer/hash blocks and unchanged manual, annex, all 17 interludes, full 20-step data, and release/pickup configuration.
+
+Browser checks against temporary built artifacts passed: zh/EN intro switching; rejected input and exact wave/bit/dial/provenance focus retention; drawer Escape/focus containment and closed inertness; note export and import-draft retention; two-tab import/reset adoption with recoverable notes; storage-denied warning, in-memory export, language URL fallback and retained QR URL; blocked-storage language switching without reloading or losing in-memory notes/receipt and direct session-save download from the warning; nested root/project 404 assets/home plus no-JavaScript recovery. Dial/tracks at 320, 375, 400, 768 and desktop widths had no horizontal page overflow and their local scrollers reached all content. A 200% CSS zoom simulation and reduced-motion check passed; this is not a real-device/browser-zoom or screen-reader certification, nor a blind solve of all external-research puzzles.
+
+Commands for the intended Pages artifact are `node --test tests/*.test.mjs`, `node scripts/build.mjs --base=/recursive-web-2/`, and `node scripts/build.mjs --base=/recursive-web-2/ --verify`. For isolated checks, add `--out-dir=/absolute/new-empty-directory` to both build and verification commands. The default build's deletion of pre-existing `dist/` was denied locally and was not bypassed; temporary outputs were used instead.
+
+No live publication, GitHub Pages setting, or deployed GM URL was changed in this repair. A read-only Pages-source inspection could not run because `gh` is not installed in this session. Live root publication remains unresolved until an authorized, separate check establishes the actual Pages source and publication path. Confirm Actions is the source, confirm the uploaded player-only artifact is the one served, and then verify missing nested paths and removed GM URLs return genuine 404 responses with working game resources/home links. Repository changes or a local passing build do not prove the live root is safe.

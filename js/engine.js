@@ -19,10 +19,47 @@
   noisewords:'<figure class="evidence-photo reveal"><img src="assets/photo-reels.svg" alt="盘式录音机的翻拍照片" loading="lazy"/><figcaption>原始载体 · 未数字化归档</figcaption></figure>'
  };
  const defaultState = () => ({v:1,started:false,stepUnlocked:0,current:0,hints:{},notes:'',solved:{},receivedSeal:'',ended:false,endingChoice:'',waveA:null,waveB:null,bits:'0100011',verdict:[null,null,null,null,null,null],traceOpen:[],drawAttempts:0,maiTapped:[],capstoneOk:false,introDismissed:false});
+ function normalizeState(obj){
+  const s={...defaultState(),...(obj&&typeof obj==='object'&&!Array.isArray(obj)?obj:{})};
+  s.v=1;s.stepUnlocked=Math.max(0,Math.min(D.steps.length,Number.isInteger(s.stepUnlocked)?s.stepUnlocked:0));
+  s.current=Math.max(0,Math.min(D.steps.length-1,Number.isInteger(s.current)?s.current:0));
+  s.notes=typeof s.notes==='string'?s.notes:'';s.receivedSeal=typeof s.receivedSeal==='string'?s.receivedSeal:'';
+  s.solved=s.solved&&typeof s.solved==='object'&&!Array.isArray(s.solved)?s.solved:{};
+  s.verdict=Array.from({length:6},(_,i)=>typeof s.verdict?.[i]==='boolean'?s.verdict[i]:null);
+  s.bits=/^[01]{7}$/.test(s.bits)?s.bits:defaultState().bits;
+  s.maiTapped=[...new Set((Array.isArray(s.maiTapped)?s.maiTapped:[]).filter(n=>Number.isInteger(n)&&n>=1&&n<=13))];
+  s.traceOpen=(Array.isArray(s.traceOpen)?s.traceOpen:[]).filter(n=>['1946','1986','1998','2026'].includes(n));
+  for(const k of ['waveA','waveB'])if(!Number.isInteger(s[k])||s[k]<0||s[k]>=12)s[k]=null;
+  s.drawAttempts=Number.isInteger(s.drawAttempts)&&s.drawAttempts>=0?s.drawAttempts:0;
+  for(const k of ['started','ended','capstoneOk','introDismissed'])s[k]=s[k]===true;
+  return s;
+ }
+ let persisted=null,storageUnavailable=false,durable=false,epoch=0,conflictNotice=false;
+ const recoveryDrafts={};
  let state;
- try { state = {...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')}; } catch {state=defaultState()}
- // 旧存档兼容：判断题不足六项的补空。
- state.verdict = Array.from({length:6},(_,i)=>state.verdict?.[i]??null);
+ try{persisted=localStorage.getItem(STORAGE_KEY);state=normalizeState(JSON.parse(persisted||'{}'));}
+ catch{state=defaultState();storageUnavailable=true;}
+ function captureRecovery(){
+  if(state.notes)recoveryDrafts['notes-field']=state.notes;
+  for(const id of ['notes-field','save-import','answer-input','capstone-input']){
+   const el=document.getElementById(id);if(el?.value)recoveryDrafts[id]=el.value;
+  }
+ }
+ function syncState(render=true){
+  let raw;try{raw=localStorage.getItem(STORAGE_KEY);}catch{storageUnavailable=true;durable=false;renderStorageNotice();return true;}
+  if(raw===persisted)return true;
+  captureRecovery();persisted=raw;epoch++;conflictNotice=true;
+  try{state=normalizeState(JSON.parse(raw||'{}'));storageUnavailable=false;}catch{state=defaultState();storageUnavailable=true;}
+  resultMessage='';
+  if(render)refreshFromState();
+  return false;
+ }
+ function mutate(change){
+  if(!syncState())return false;
+  const previous=state;state=normalizeState(JSON.parse(JSON.stringify(state)));change(state);
+  if(!save()){if(!conflictNotice)state=previous;return false;}
+  epoch++;return true;
+ }
  let resultMessage = '', curStep = null, REL = './', failStreak = 0;
  let panelKind = null, panelEvId = null;
  const norm = v => String(v??'').normalize('NFKC').toUpperCase().replace(/[\s\-_/:.,，。；;()（）\[\]]/g,'');
@@ -31,7 +68,31 @@
  const stepCount = D.steps.length;
  const solvedCount = () => Math.min(state.stepUnlocked,stepCount);
  const isDone = i => i < state.stepUnlocked;
- function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({...state,current:Math.min(state.current,stepCount)}));}catch(e){console.warn('保存失败',e)}}
+ function save(){
+  if(!syncState())return false;
+  const raw=JSON.stringify(state);durable=false;
+  try{
+   localStorage.setItem(STORAGE_KEY,raw);
+   if(localStorage.getItem(STORAGE_KEY)!==raw){syncState();return false;}
+   persisted=raw;storageUnavailable=false;durable=true;
+  }catch{storageUnavailable=true;}
+  refreshExport();renderStorageNotice();return true;
+ }
+ function refreshExport(){const el=document.getElementById('save-export');if(el)el.value=encodeSave();}
+ function renderStorageNotice(){
+  if(!document.querySelector)return;
+  let el=document.getElementById('storage-notice');
+  if(!el){const host=document.querySelector('main .shell');if(!host)return;el=document.createElement('div');el.id='storage-notice';el.className='storage-notice';el.setAttribute('role','status');host.prepend(el);}
+  el.hidden=!storageUnavailable&&!conflictNotice;
+  const message=storageUnavailable?zt('浏览器无法保存记录。目前进度仅在本页内存中；离开前请导出存档。扫码链接尚未安全保存时，请保留原链接。','Browser storage is unavailable. Progress is in this page only; export a save before leaving. Keep the original QR link until it is safely stored.'):zt('另一页面已更改存档。本页已采用最新记录，未覆盖它。旧输入保留在工作台的恢复草稿中；请核对后再继续。','Another page changed the save. This page adopted the latest record without overwriting it. Previous input is available in workbench recovery drafts; review it before continuing.');
+  if(el.dataset.message===message)return;el.dataset.message=message;el.textContent=message;
+  if(storageUnavailable){const button=document.createElement('button');button.className='btn';button.textContent=zt('导出本页存档','Export this page save');button.addEventListener('click',()=>downloadText('zephyr-session-save.txt',encodeSave()));el.appendChild(button);}
+ }
+ function refreshFromState(){
+  if(curStep){const idx=isAccessible(stepIdx(curStep.id))?stepIdx(curStep.id):Math.min(state.stepUnlocked,stepCount-1);curStep=D.steps[idx];}
+  reboot(false);renderFinale(false);renderStorageNotice();
+ }
+ function recoveryBody(){return Object.entries(recoveryDrafts).map(([id,value])=>`<section class="recovery-draft"><p class="k">${zt('恢复草稿','RECOVERY DRAFT')} · ${esc(id)}</p><textarea class="note-area" readonly aria-label="${zt('恢复草稿','Recovery draft')}">${esc(value)}</textarea></section>`).join('');}
  const showToast = msg => {const el = document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);window.setTimeout(()=>el.remove(),3300)};
  // Production always enforces the configured schedule; no preview bypass.
  function releaseTime(day){const t=Date.parse(C.launchAt);if(!Number.isFinite(t)||!Number.isInteger(day)||day<1||!Number.isFinite(C.chapterIntervalHours)||C.chapterIntervalHours<=0)return Infinity;return t+(day-1)*C.chapterIntervalHours*3600000}
@@ -61,12 +122,19 @@
  const finaleCapstoneHash = '2de847be143a0f215df255c8586163c48f9f6e2def77f7ba2f5b109885a0827c';
  // 校验失败只给冷回复。没有方法，没有格式提示，没有第二次机会之外的宽限。
  function rejectMsg(){const staged=[zt('校验失败 :: CHECKSUM MISMATCH','VERIFY FAILED :: CHECKSUM MISMATCH'),zt('输入与既有校验值不一致。记录未变更。','The input does not match the recorded checksum. No change was made.')];return staged[Math.min(failStreak,staged.length)-1]}
- async function submitInput(value){let s=curStep;if(!s||!isAccessible(stepIdx(s.id))||isDone(stepIdx(s.id)))return;const input=norm(value);
-  if(acceptedHash[s.id]&&await sha256Text(s.id+':'+input)===acceptedHash[s.id]){complete(s.id);return}
+ async function submitInput(value){if(!syncState())return;const s=curStep,ticket=epoch;if(!s||!isAccessible(stepIdx(s.id))||isDone(stepIdx(s.id)))return;const input=norm(value);
+  const hash=await sha256Text(s.id+':'+input);
+  if(!syncState()||ticket!==epoch||curStep?.id!==s.id)return;
+  if(acceptedHash[s.id]&&hash===acceptedHash[s.id]){complete(s.id);return}
   failStreak++;sfx.reject();resultMessage=rejectMsg();reboot()
  }
  const stepIdx = id => D.steps.findIndex(s=>s.id===id);
- function complete(id){const idx=stepIdx(id);if(!isAccessible(idx)||idx!==state.stepUnlocked||state.solved[id])return;const s=D.steps[idx];state.solved[id]=true;state.stepUnlocked=idx+1;state.current=idx;resultMessage='';failStreak=0;save();showToast(zt(`修复校验通过 :: ${TITLES[id]||s.title} 已归档`,`VERIFIED :: ${TITLES[id]||s.title} FILED`));sfx.accept();ceremony();if(state.stepUnlocked===stepCount){console.log('%cARCHIVE-00 :: CASE Z-00 CLOSED','color:#b23a2e;font-family:monospace;font-size:12px');const fl=document.getElementById('finale-link');if(fl)fl.hidden=false}window.setTimeout(()=>reboot(),700)}
+ function complete(id){if(!syncState())return;const idx=stepIdx(id);if(!isAccessible(idx)||idx!==state.stepUnlocked||state.solved[id])return;const s=D.steps[idx];
+  if(!mutate(s=>{s.solved[id]=true;s.stepUnlocked=idx+1;s.current=idx;}))return;
+  resultMessage='';failStreak=0;showToast(zt(`修复校验通过 :: ${TITLES[id]||s.title} 已归档`,`VERIFIED :: ${TITLES[id]||s.title} FILED`));sfx.accept();ceremony();
+  if(state.stepUnlocked===stepCount){console.log('%cARCHIVE-00 :: CASE Z-00 CLOSED','color:#b23a2e;font-family:monospace;font-size:12px');const fl=document.getElementById('finale-link');if(fl)fl.hidden=false}
+  const ticket=epoch;window.setTimeout(()=>{if(syncState()&&epoch===ticket)reboot();},700);
+ }
  /* ===== 入场动效（prefers-reduced-motion 由 CSS 兜底） ===== */
  function animateIn(scope){const els=scope.querySelectorAll('.reveal');if(!els.length)return;
   els.forEach((el,i)=>el.style.transitionDelay=Math.min(i*70,420)+'ms');
@@ -120,9 +188,10 @@
  function renderSpecialControls(s){if(s.kind==='wave')return `<p><button class="btn" data-act="compare-wave">${zt('校验采样','VERIFY SAMPLES')}</button></p>`;
   if(s.kind==='hamming')return `<p><button class="btn" data-act="check-hamming">${zt('验证校验位','CHECK PARITY')}</button></p>`;
   if(s.kind==='verdict')return `<p><button class="btn" data-act="check-verdict">${zt('提交来源审计','SUBMIT AUDIT')}</button></p>`;return ''}
- async function verifyWave(){if(state.waveA===null||state.waveB===null){resultMessage=zt('请先在两卷录音中各选一个片段。','Select one fragment on each reel first.');reboot();return}
+ async function verifyWave(){if(!syncState())return;const ticket=epoch;if(state.waveA===null||state.waveB===null){resultMessage=zt('请先在两卷录音中各选一个片段。','Select one fragment on each reel first.');reboot();return}
   const A=aWaves[state.waveA],B=bWaves[state.waveB];const same=A.every((x,i)=>x===B[i]);
   const hashA=await waveDigestOf(A),hashB=await waveDigestOf(B);
+  if(!syncState()||ticket!==epoch||curStep?.id!=='reels')return;
   if(same){complete('reels');return}
   resultMessage=zt(`采样不一致 :: A${state.waveA+1} ≠ B${state.waveB+1}`,`SAMPLE MISMATCH :: A${state.waveA+1} ≠ B${state.waveB+1}`);sfx.reject();reboot();let el=document.getElementById('wave-digest');if(el)el.textContent=`SHA(A) ${hashA.slice(0,24)}… / SHA(B) ${hashB.slice(0,24)}…`
  }
@@ -131,12 +200,14 @@
  const maiOhm=[3.3,0.68,15,4.7,1.5,10,0.47,33,47,6.8,1.0,22,2.2];
  function renderMai(){const N=maiLetters.length,r=112,ox=150,oy=150,padPx=48;
   const revealed=new Set(state.maiTapped||[]);
-  let pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N;const x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2;return `<button class="mai-pad" data-mai="${i+1}" style="left:${x}px;top:${y}px;width:${padPx}px;height:${padPx}px" aria-label="${zt(`触点 ${i+1}`,`Contact ${i+1}`)}"><small>${i+1} · ${maiOhm[i]}k</small>${revealed.has(i+1)?c:'·'}</button>`}).join('');
+  const pads=maiLetters.map((c,i)=>{const angle=-Math.PI/2+i*2*Math.PI/N,x=ox+r*Math.cos(angle)-padPx/2,y=oy+r*Math.sin(angle)-padPx/2,shown=revealed.has(i+1);
+   return `<button class="mai-pad" data-mai="${i+1}" style="left:${x/3}%;top:${y/3}%;width:16%;height:16%" aria-pressed="${shown}" aria-label="${zt(`触点 ${i+1}，阻抗 ${maiOhm[i]} 千欧，${shown?'字符 '+c:'未揭示'}`,`Contact ${i+1}, ${maiOhm[i]} kilo-ohms, ${shown?'character '+c:'unrevealed'}`)}"><small>${i+1} · ${maiOhm[i]}k</small>${shown?c:'·'}</button>`;
+  }).join('');
   const taps=state.maiTapped||[];
-  return `<div class="mai-scene reveal"><div class="mai-round">${pads}<div class="mai-center">13 CHANNELS</div></div><div class="mai-info"><div class="mai-taps">${taps.length?taps.map(n=>`<span class="tap-number">${n}</span>`).join(''):`<span class="tiny">${zt('触发触点以显示字符','Tap a contact to reveal its character')}</span>`}</div>${taps.length>=N?`<div class="terminal-block">TRANSCRIPT :: ${esc(taps.map(n=>maiLetters[n-1]).join(''))}</div><p><button class="btn" data-act="mai-reset">${zt('清空转写','CLEAR TRANSCRIPT')}</button></p>`:(taps.length?`<p><button class="btn" data-act="mai-reset">${zt('清空转写','CLEAR TRANSCRIPT')}</button></p>`:'')}</div></div>`}
+  return `<div class="mai-scene reveal"><div class="mai-scroll" tabindex="0" role="region" aria-label="${zt('信号转盘，可横向滚动','Signal dial, horizontally scrollable')}"><div class="mai-round">${pads}<div class="mai-center">13 CHANNELS</div></div></div><p class="scroll-hint">${zt('窄屏可横向滚动转盘；键盘聚焦后用左右键。','On narrow screens, scroll the dial sideways; use arrow keys when focused.')}</p><div class="mai-info" aria-live="polite"><div class="mai-taps">${taps.length?taps.map(n=>`<span class="tap-number">${n} · ${esc(maiLetters[n-1])}</span>`).join(''):`<span class="tiny">${zt('触发触点以显示字符','Tap a contact to reveal its character')}</span>`}</div>${taps.length?`<div class="terminal-block">TRANSCRIPT :: ${esc(taps.map(n=>maiLetters[n-1]).join(''))}</div><p><button class="btn" data-act="mai-reset">${zt('清空转写','CLEAR TRANSCRIPT')}</button></p>`:''}</div></div>`}
  const arcaeaTarget='MIRRORYEAR1986';const arcBeats=[9,4,12,2,14,7,10,5,1,13,6,11,3,8];const arcaeaActive=['sky','floor','sky','floor','floor','sky','sky','floor','sky','floor','floor','sky','floor','sky'];
  const otherNoise=['Q','V','Z','K','T','A','7','G','L','P','W','R','5','H'];
- function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i],ch=arcaeaTarget[arcBeats[i]-1];let s=on==='sky'?ch:otherNoise[i],f=on==='floor'?ch:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}const stamps=arcBeats.map(b=>`<div class="arc-cell arc-stamp"><small>${b}</small></div>`).join('');return `<div class="arcaea-board reveal"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div><div class="lane-title"><span>${zt('时标','STAMP')} / STAMP</span><span>${zt('誊录顺序未整理','Transcription order not settled')}</span></div><div class="arc-row">${stamps}</div></div>`+term('SECOND LAYER / CIPHER\n\nFPVCC NCVTI MKBTC GGIDK TMLGD VP\n\n[印章] KEY: 亮格连读所得')}
+ function renderArcaea(){let sky='',floor='';for(let i=0;i<arcaeaTarget.length;i++){const on=arcaeaActive[i],ch=arcaeaTarget[arcBeats[i]-1];let s=on==='sky'?ch:otherNoise[i],f=on==='floor'?ch:otherNoise[i];sky+=`<div class="arc-cell ${on==='sky'?'on sky':''}">${s}<small>${on==='sky'?'●':''}</small></div>`;floor+=`<div class="arc-cell ${on==='floor'?'on floor':''}">${f}<small>${on==='floor'?'●':''}</small></div>`}const stamps=arcBeats.map(b=>`<div class="arc-cell arc-stamp"><small>${b}</small></div>`).join('');return `<div class="arc-scroll reveal" tabindex="0" role="region" aria-label="${zt('双轨与共用时标，可横向滚动','Both tracks and shared stamps, horizontally scrollable')}"><div class="arcaea-board"><div class="lane-title"><span>SKY / 2026</span><span>UPPER TRACK</span></div><div class="arc-row">${sky}</div><div class="lane-title"><span>FLOOR / 1986</span><span>LOWER TRACK</span></div><div class="arc-row">${floor}</div><div class="lane-title"><span>${zt('时标','STAMP')} / STAMP</span><span>${zt('誊录顺序未整理','Transcription order not settled')}</span></div><div class="arc-row">${stamps}</div></div></div><p class="scroll-hint">${zt('窄屏请横向滚动，查看两轨及全部时标；键盘聚焦后用左右键。','Scroll sideways on narrow screens to see both tracks and all stamps; use arrow keys when focused.')}</p>`+term('SECOND LAYER / CIPHER\n\nFPVCC NCVTI MKBTC GGIDK TMLGD VP\n\n[印章] KEY: 亮格连读所得')}
  function hammingSyndrome(bits){const b=[...bits].map(Number),xor=indices=>indices.reduce((r,i)=>r^b[i-1],0);let s1=xor([1,3,5,7]),s2=xor([2,3,6,7]),s4=xor([4,5,6,7]);return {s1,s2,s4}}
  const pullCards=[
   {id:'U-11',char:'ARCHIVE / 01',star:2},{id:'U-42',char:'ARCHIVE / 02',star:2},
@@ -153,7 +224,7 @@
   return `<div class="drop-lock reveal"><div class="eyebrow">Z-00 / DELIVERY LOCK</div><pre class="seal-code">${esc(C.pickup.encodedCoords||'')}</pre><p class="tiny">${esc(C.pickup.instructions||'')}</p></div>`}
  const questions=[['1946 年设备记录确实记载了八组电脉冲。',true],['许静仪的身份已由 1946 年未经修改的人员原件证实。',false],['1986 第二卷录音独立于第一卷采样形成。',false],['2026 内部的独立审计记录曾被人为筛选或改写。',true],['登记表上第二枚 1946 印章（KING EDWARD VII COLLEGE OF MEDICINE）系 2026 年伪造。',false],['2015 年该建筑曾同时正式使用 THE HIVE 与 THE LEARNING HUB 两个名字。',true]];
  function renderVerdict(){return `<div class="terminal-block reveal">FINAL AUDIT / ORIGINAL SOURCE\nDEVICE INDEX: 见第一卷\nFOUND: EIGHT PULSES\nOPERATOR IDENTITY: NOT ESTABLISHED\nSAMPLE INDEPENDENCE: FAILED\nEVALUATION INTEGRITY: FAILED\nSECOND STAMP 1946: GENUINE / OFF-CHANNEL\n2015 DUAL NAME: BOTH OFFICIAL</div><div class="dossier-list reveal" style="margin-top:16px">${questions.map((q,i)=>`<div class="claim"><div class="memory-card-title">CLAIM ${pad(i+1)}</div><div class="claim-text">${esc(q[0])}</div><div class="validation-grid"><label><input type="radio" name="claim${i}" value="T" ${state.verdict[i]===true?'checked':''}/> ${zt('可由证据支持','Supported by the evidence')}</label><label><input type="radio" name="claim${i}" value="F" ${state.verdict[i]===false?'checked':''}/> ${zt('不能由证据支持','Not supported by the evidence')}</label></div></div>`).join('')}</div>`}
- function submitVerdict(){const chosen=state.verdict;if(chosen.some(x=>x===null)){resultMessage=zt('尚有未完成的判断。','Some claims are still unanswered.');reboot();return}const all=questions.every((q,i)=>q[1]===chosen[i]);if(all){complete('judgment')}else{sfx.reject();resultMessage=zt('至少一项结论与原件不符。','At least one conclusion does not match the original.');reboot()}}
+ function submitVerdict(){if(!syncState())return;const chosen=state.verdict;if(chosen.some(x=>x===null)){resultMessage=zt('尚有未完成的判断。','Some claims are still unanswered.');reboot();return}const all=questions.every((q,i)=>q[1]===chosen[i]);if(all){complete('judgment')}else{sfx.reject();resultMessage=zt('至少一项结论与原件不符。','At least one conclusion does not match the original.');reboot()}}
  /* ===== 卷宗装配（著录：档号 / 题名 / 状态；无序号计数） ===== */
  function recMeta(s){const idx=stepIdx(s.id);const no=ARCHIVE_NO[s.id]||'—';const status=isDone(idx)?zt('修复校验已完成','VERIFICATION COMPLETE'):zt('开放阅览','OPEN FOR READING');
   return `<header class="rec-meta reveal"><span class="rec-no">${esc(no)}</span><h2 class="rec-title">${esc(TITLES[s.id]||s.title)}</h2><span class="rec-status ${isDone(idx)?'is-done':''}">${status}</span></header>`}
@@ -176,7 +247,7 @@
   return html}
  function navigate(id){const idx=stepIdx(id);if(idx<0)return;
   if(!isAccessible(idx)){showToast(zt('该卷暂不开放阅览','This volume is not yet open for reading'));return}
-  resultMessage='';try{history.replaceState(null,'',location.pathname+'?rec='+encodeURIComponent(id))}catch{}
+  epoch++;resultMessage='';try{const args=new URLSearchParams(location.search);args.set('rec',id);history.replaceState(null,'',location.pathname+'?'+args.toString())}catch{}
   const body=document.getElementById('reader');body.innerHTML=recordBody(id);wire(body);animateIn(body);window.scrollTo({top:0,behavior:'auto'})}
  /* ===== 证物面板 ===== */
  function evidenceBody(id){const list=allEvidence();
@@ -187,25 +258,65 @@
  function progressLabel(){const n=solvedCount();if(n>=stepCount)return zt('结案 · Z-00','CASE CLOSED · Z-00');const s=D.steps[Math.min(state.stepUnlocked,stepCount-1)];return (isEn()?(D.daysEn&&D.daysEn[s.day]):(D.days&&D.days[s.day]))||''}
  function notesBody(){return `<div class="panel-meta">${esc(progressLabel())}</div>
   <h3>${zt('调查笔记','Investigation notes')}</h3><p class="tiny">${zt('你记录的推理仅保存在当前浏览器，不会发送到服务器。切勿写入需要在线同步的敏感个人信息。','Your notes are kept in this browser only and never sent to a server. Do not store sensitive personal information here.')}</p><textarea id="notes-field" class="note-area" placeholder="${zt('时间线、可疑版本、需要回头复核的细节……','Timeline, suspect versions, details to re-check…')}">${esc(state.notes)}</textarea><p><button class="btn" data-act="export">${zt('导出调查记录 .txt','Export notes as .txt')}</button></p>
-  <h3>${zt('跨设备转移','Moving between devices')}</h3><p class="muted">${zt('本系统不使用云端账号。复制一次性的本地存档字符串，贴到另一台设备即可转移进度。存档包含笔记，请只在你自己的设备之间传递。','This system has no cloud account. Copy the one-time local save string and paste it on another device to transfer progress. The save includes your notes; share it only between your own devices.')}</p><p class="k">${zt('此设备的存档（选中复制）',"This device's save (select and copy)")}</p><textarea id="save-export" class="note-area" style="min-height:84px" readonly>${esc(encodeSave())}</textarea><p class="k" style="margin-top:14px">${zt('从另一台设备导入存档','Import a save from another device')}</p><textarea id="save-import" class="note-area" style="min-height:84px" placeholder="${zt('将另一台设备的存档字符串粘贴在这里','Paste the save string from the other device here')}"></textarea><p style="margin-top:10px"><button class="btn" data-act="import-save">${zt('导入并覆盖本机进度','Import and overwrite this device')}</button></p>
+  <h3>${zt('跨设备转移','Moving between devices')}</h3><p class="muted">${zt('本系统不使用云端账号。复制一次性的本地存档字符串，贴到另一台设备即可转移进度。存档包含笔记，请只在你自己的设备之间传递。','This system has no cloud account. Copy the one-time local save string and paste it on another device to transfer progress. The save includes your notes; share it only between your own devices.')}</p><p class="k">${zt('此设备的存档（选中复制）',"This device's save (select and copy)")}</p><textarea id="save-export" class="note-area" style="min-height:84px" readonly>${esc(encodeSave())}</textarea>${recoveryBody()}<p class="k" style="margin-top:14px">${zt('从另一台设备导入存档','Import a save from another device')}</p><textarea id="save-import" class="note-area" style="min-height:84px" placeholder="${zt('将另一台设备的存档字符串粘贴在这里','Paste the save string from the other device here')}"></textarea><p style="margin-top:10px"><button class="btn" data-act="import-save">${zt('导入并覆盖本机进度','Import and overwrite this device')}</button></p>
   <h3>${zt('系统提示音','System sounds')}</h3><p><button class="btn" data-act="audio">${audioMuted?zt('开启提示音','Enable sounds'):zt('关闭提示音','Disable sounds')}</button></p>
   <h3>${zt('重置','Reset')}</h3><p><button class="btn" data-act="reset">${zt('清除本设备的全部调查进度和笔记','Erase all progress and notes on this device')}</button></p>`}
  /* ===== 面板开合 ===== */
- function openPanel(kind,evId){panelKind=kind;panelEvId=evId||null;
+ // Subtree replacement preserves the exact focused control and local drafts, not just a control type.
+ const identity=el=>el?.id?['id',el.id]:el?.hasAttribute('data-lang-toggle')?['language']:['data-wave','data-bit','data-trace','data-mai'].map(k=>[k,el?.getAttribute(k)]).find(([,v])=>v!==null&&v!==undefined)||
+  (el?.name?['radio',el.name,el.value]:el?.dataset?.act?['action',el.dataset.act,el.dataset.ev||el.dataset.rec||'']:null);
+ function replaceView(body,html,preserve=true){
+  const active=document.activeElement,inside=body.contains(active),key=inside?identity(active):null;
+  const fields=preserve?[...body.querySelectorAll('textarea:not([readonly]), input[type="text"]')].map(el=>({id:el.id,value:el.value,start:el.selectionStart,end:el.selectionEnd})):[];
+  const scrolls=[...body.querySelectorAll('.mai-scroll,.arc-scroll')].map(el=>[el.className,el.scrollLeft]);
+  body.innerHTML=html;wire(body);if(body.id==='drawer-body'&&panelKind==='notes')bindNotes(body);
+  for(const f of fields){const el=document.getElementById(f.id);if(el&&body.contains(el)){el.value=f.value;try{el.setSelectionRange(f.start,f.end);}catch{}}}
+  for(const [cls,left] of scrolls){const el=[...body.querySelectorAll('.mai-scroll,.arc-scroll')].find(el=>el.className===cls);if(el)el.scrollLeft=left;}
+  if(key){const el=[...body.querySelectorAll('button,input,textarea,a,[tabindex]')].find(el=>JSON.stringify(identity(el))===JSON.stringify(key));if(el)el.focus({preventScroll:true});else if(inside){body.setAttribute('tabindex','-1');body.focus({preventScroll:true});}}
+  animateIn(body);
+ }
+ let drawerOpener=null,introOpener=null;const inertBefore=new Map();
+ function currentModal(){const intro=document.querySelector('.intro-veil:not(.closing)');return intro?.querySelector('.intro-letter')||(panelKind?document.getElementById('drawer'):null);}
+ function modalBackground(){
+  const modal=currentModal();
+  for(const el of document.body.children){
+   if(['SCRIPT','STYLE'].includes(el.tagName))continue;
+   if(modal){if(!inertBefore.has(el))inertBefore.set(el,el.inert);el.inert=!(el===modal||el.contains(modal)||el.id==='backdrop');}
+  }
+  if(!modal){for(const [el,value] of inertBefore)el.inert=value;inertBefore.clear();}
+  const drawer=document.getElementById('drawer');if(drawer&&!panelKind)drawer.inert=true;
+  document.querySelectorAll('.intro-veil.closing').forEach(el=>{el.inert=true;});
+ }
+ function modalFocus(modal){const first=modal.querySelector('button,input,textarea,a[href],[tabindex="0"]');if(first)first.focus({preventScroll:true});else{modal.tabIndex=-1;modal.focus();}}
+ function modalKeys(e){const modal=currentModal();if(!modal)return;
+  if(e.key==='Escape'){e.preventDefault();if(document.querySelector('.intro-veil'))dismissIntro();else closePanel();return;}
+  if(e.key!=='Tab')return;
+  const items=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex="0"]')].filter(el=>!el.hidden&&el.getClientRects().length);
+  const first=items[0],last=items[items.length-1];if(!first){e.preventDefault();modal.focus();return;}
+  if(!modal.contains(document.activeElement)){e.preventDefault();first.focus();}
+  else if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+ }
+ function openPanel(kind,evId){const opening=!panelKind;if(opening)drawerOpener=document.activeElement;panelKind=kind;panelEvId=evId||null;
   const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
-  if(!drawer)return;drawer.classList.add('open');if(backdrop)backdrop.classList.add('open');
+  if(!drawer)return;drawer.inert=false;drawer.setAttribute('aria-hidden','false');drawer.setAttribute('role','dialog');drawer.setAttribute('aria-modal','true');drawer.classList.add('open');if(backdrop)backdrop.classList.add('open');
   document.getElementById('drawer-title').textContent=kind==='evidence'?zt('开放证物','OPEN EVIDENCE'):zt('读者工作台','READER WORKBENCH');
-  renderPanel();if(location.hash!=='#panel')try{history.replaceState(null,'',location.pathname+location.search+'#panel')}catch{}}
- function renderPanel(){const body=document.getElementById('drawer-body');if(!body)return;
-  if(panelKind==='evidence'){body.innerHTML=evidenceBody(panelEvId)}
-  else{body.innerHTML=notesBody();bindNotes(body)}
-  wire(body)}
+  renderPanel();modalBackground();if(opening&&!document.querySelector('.intro-veil'))modalFocus(drawer);
+  if(location.hash!=='#panel')try{history.replaceState(null,'',location.pathname+location.search+'#panel')}catch{}
+ }
+ function renderPanel(preserve=true){const body=document.getElementById('drawer-body');if(!body)return;
+  replaceView(body,panelKind==='evidence'?evidenceBody(panelEvId):notesBody(),preserve);refreshExport();
+ }
  function closePanel(){panelKind=null;panelEvId=null;
   const drawer=document.getElementById('drawer'),backdrop=document.getElementById('backdrop');
-  if(drawer)drawer.classList.remove('open');if(backdrop)backdrop.classList.remove('open')}
+  if(drawer){drawer.classList.remove('open');drawer.inert=true;drawer.setAttribute('aria-hidden','true');drawer.removeAttribute('aria-modal');}
+  if(backdrop)backdrop.classList.remove('open');
+  try{history.replaceState(null,'',location.pathname+location.search);}catch{}
+  modalBackground();if(drawerOpener?.isConnected&&!drawerOpener.inert)drawerOpener.focus({preventScroll:true});drawerOpener=null;
+ }
  /* ===== 开场交接单（首次到访显示一次） ===== */
  function introBody(){
-  if(isEn()){return `<div class="intro-letter" role="dialog" aria-label="Internal handover note (translated copy)">
+  if(isEn()){return `<div class="intro-letter" role="dialog" aria-modal="true" aria-label="Internal handover note (translated copy)">${introFraming()}
   <div class="intro-head">NANYU MUNICIPAL ARCHIVES · INTERNAL HANDOVER NOTE · TRANSLATED COPY · NOT FILED WITH THE RECORDS</div>
   <h2 class="intro-title">To whoever takes over this workbench</h2>
   <p>You don't need to turn the light table off. It used to be switched off, but the switch broke once, and after it was fixed nobody bothered anymore. In summer that side gets hot — just move your chair out a bit.</p>
@@ -222,7 +333,7 @@
   <p class="intro-sign">Good luck.</p>
   <p class="intro-actions"><button class="btn" data-act="dismiss-intro">Take over the workbench</button></p>
  </div>`}
-  return `<div class="intro-letter" role="dialog" aria-label="内部交接单">
+  return `<div class="intro-letter" role="dialog" aria-modal="true" aria-label="内部交接单">${introFraming()}
   <div class="intro-head">南屿市档案馆 · 内部交接单 · 不随卷宗归档</div>
   <h2 class="intro-title">致接手这张工作台的人</h2>
   <p>灯箱不用关。原来是要关的，后来开关坏过一次，修好以后也没人关了。夏天坐那边热，自己把椅子往外挪一点。</p>
@@ -239,14 +350,23 @@
   <p class="intro-sign">祝顺利。</p>
   <p class="intro-actions"><button class="btn" data-act="dismiss-intro">接手工作台</button></p>
  </div>`}
+ function introFraming(){return `<div class="intro-language"><span>${zt('界面语言','Interface language')}</span><button class="lang-toggle" data-lang-toggle aria-label="${zt('Switch to English','切换到中文')}">${isEn()?'中文':'EN'}</button></div><p class="play-notice">${zt('开始前：本作保留中文原件及文字谜题，需使用外部检索、地图和音频分析工具。完整流程包括线下领取实体二维码；仅远程游玩无法走完整条链。','Before starting: Chinese originals and text puzzles remain essential. External research, maps and audio-analysis tools are involved. Completion includes a physical QR pickup; remote-only play cannot finish the chain.')}</p>`;}
  function showIntro(){
+  introOpener=document.activeElement;
   const veil=document.createElement('div');veil.className='intro-veil';veil.innerHTML=introBody();
-  document.body.appendChild(veil);wire(veil);
+  document.body.appendChild(veil);wire(veil);modalBackground();modalFocus(veil.querySelector('.intro-letter'));
   window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>veil.classList.add('on')));
+ }
+ function dismissIntro(){
+  if(!mutate(s=>{s.introDismissed=true;}))return;
+  const v=document.querySelector('.intro-veil');if(v){v.inert=true;v.classList.remove('on');v.classList.add('closing');v.querySelector('.intro-letter').removeAttribute('aria-modal');
+   // Keep the transition, but immediately return focus and release background interaction.
+   modalBackground();if(panelKind)modalFocus(document.getElementById('drawer'));else if(introOpener?.isConnected)introOpener.focus({preventScroll:true});window.setTimeout(()=>v.remove(),320);
+  }
  }
  /* ===== 结案报告页 ===== */
  function finaleBody(){if(!released(D.steps[stepCount-1].day)||state.stepUnlocked<stepCount)return `<div class="notice">${zt('该报告尚未解封。结案报告（Z-00）须在全部卷宗完成修复校验后开放阅览。','This report is still sealed. The closing report (Z-00) opens for reading only after every volume has passed verification.')}</div><p><a href="index.html">${zt('回到阅览','Back to reading')}</a></p>`;
-  if(!state.capstoneOk){return `<div class="k">${zt('Z-00 · 结案档案 · 2026','Z-00 · CASE FILE · 2026')}</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" autocomplete="off" spellcheck="false" placeholder="${zt('拆封口令','Unsealing phrase')}"/><button type="submit" class="btn">${zt('拆封','UNSEAL')}</button></form></div>${renderFeedback()}`}
+  if(!state.capstoneOk){return `<div class="k">${zt('Z-00 · 结案档案 · 2026','Z-00 · CASE FILE · 2026')}</div><div class="drop-lock reveal"><div class="eyebrow">FINAL SEAL / Z-00</div><form id="capstone-form" class="answer-row"><input type="text" id="capstone-input" aria-label="${zt('拆封口令','Unsealing phrase')}" autocomplete="off" spellcheck="false" placeholder="${zt('拆封口令','Unsealing phrase')}"/><button type="submit" class="btn">${zt('拆封','UNSEAL')}</button></form></div>${renderFeedback()}`}
   return `<div class="k">${zt('Z-00 · 结案档案 · 2026','Z-00 · CASE FILE · 2026')}</div><h2 class="finale-h">第零号证人从未出生。</h2><div class="terminal-block">CASE Z-00 / CLOSED
 身份：许静仪 · 合成于 2025-04-03 13:30 · 2026 年登记为补录
 SOURCE ROOT: CORE-17 · 三个年代，同一生成根
@@ -260,38 +380,40 @@ REEL-A / REEL-B：共享采样
   case 'show-evidence':openPanel('evidence',el.dataset.ev);break;
   case 'nav':navigate(el.dataset.rec);break;
   case 'compare-wave':await verifyWave();break;
-  case 'gacha':state.drawAttempts=(state.drawAttempts||0)+1;save();reboot();break;
-  case 'check-hamming':{let syn=hammingSyndrome(state.bits),changes=[...state.bits].filter((v,i)=>v!=='0100011'[i]).length;if(syn.s1===0&&syn.s2===0&&syn.s4===0&&changes===1&&state.bits==='0110011'){complete('parity')}else{sfx.reject();resultMessage=zt('S4S2S1 ≠ 000 :: 单比特修正未完成。','S4S2S1 ≠ 000 :: Single-bit correction not complete.');reboot()}break}
-  case 'mai-reset':{state.maiTapped=[];save();reboot();break}
+  case 'gacha':if(mutate(s=>{s.drawAttempts++;}))reboot();break;
+  case 'check-hamming':{if(!syncState())break;let syn=hammingSyndrome(state.bits),changes=[...state.bits].filter((v,i)=>v!=='0100011'[i]).length;if(syn.s1===0&&syn.s2===0&&syn.s4===0&&changes===1&&state.bits==='0110011'){complete('parity')}else{sfx.reject();resultMessage=zt('S4S2S1 ≠ 000 :: 单比特修正未完成。','S4S2S1 ≠ 000 :: Single-bit correction not complete.');reboot()}break}
+  case 'mai-reset':{if(mutate(s=>{s.maiTapped=[];}))reboot();break}
   case 'check-verdict':submitVerdict();break;
   case 'export':downloadText('zephyr-investigation-notes.txt',state.notes||zt('（空白调查笔记）','(empty investigation notes)'));break;
   case 'audio':{sfx.toggle();showToast(audioMuted?zt('系统提示音已关闭','System sounds off'):zt('系统提示音已开启','System sounds on'));renderPanel();break}
-  case 'import-save':{try{let txt=document.getElementById('save-import')?.value||'',obj=decodeSave(txt);if(obj.v!==1||!Number.isInteger(obj.stepUnlocked)||obj.stepUnlocked<0||obj.stepUnlocked>stepCount)throw Error('记录版本或完成章节数有误');if(!window.confirm(zt('确定将这份存档覆盖本机当前进度和笔记吗？','Overwrite this device\'s current progress and notes with this save?')))break;state={...defaultState(),...obj,current:Math.max(0,Math.min(stepCount,obj.current||0))};resultMessage='';save();reboot();renderPanel();showToast(zt('存档已导入','Save imported'));}catch(err){showToast(zt('存档格式无效，请重新复制完整内容','Invalid save format; copy the full string again'))}break}
+  case 'import-save':{try{let txt=document.getElementById('save-import')?.value||'',obj=decodeSave(txt);if(obj.v!==1||!Number.isInteger(obj.stepUnlocked)||obj.stepUnlocked<0||obj.stepUnlocked>stepCount)throw Error('Invalid save');if(!syncState())break;const ticket=epoch;if(!window.confirm(zt('确定将这份存档覆盖本机当前进度和笔记吗？','Overwrite this device\'s current progress and notes with this save?')))break;if(!syncState()||ticket!==epoch)break;captureRecovery();if(!mutate(s=>Object.assign(s,normalizeState(obj))))break;resultMessage='';refreshFromState();showToast(durable?zt('存档已导入','Save imported'):zt('已载入本页；尚未保存到浏览器，请导出备份。','Loaded in this page only; not saved to the browser. Export a backup.'));}catch(err){showToast(zt('存档格式无效，请重新复制完整内容','Invalid save format; copy the full string again'))}break}
   case 'reset':reset();break;
-  case 'dismiss-intro':{state.introDismissed=true;save();const v=document.querySelector('.intro-veil');if(v){v.classList.remove('on');window.setTimeout(()=>v.remove(),320)}break}
+  case 'dismiss-intro':dismissIntro();break;
   default:break
  }}));
- scope.querySelectorAll('[data-wave]').forEach(el=>el.addEventListener('click',()=>{const [side,n]=el.dataset.wave.split(':');state[side==='A'?'waveA':'waveB']=Number(n);sfx.blip(430,.05,'sine',.012);save();reboot()}));
- scope.querySelectorAll('[data-bit]').forEach(el=>el.addEventListener('click',()=>{let i=Number(el.dataset.bit),b=[...state.bits];b[i]=b[i]==='1'?'0':'1';state.bits=b.join('');sfx.blip(660,.04,'square',.01);save();reboot()}));
- scope.querySelectorAll('[data-trace]').forEach(el=>el.addEventListener('click',()=>{let id=el.dataset.trace;state.traceOpen=state.traceOpen.includes(id)?state.traceOpen.filter(x=>x!==id):[...state.traceOpen,id];save();reboot()}));
- scope.querySelectorAll('[data-mai]').forEach(el=>el.addEventListener('click',()=>{let n=Number(el.dataset.mai);if((state.maiTapped||[]).includes(n)){playTap(n);return}state.maiTapped=[...(state.maiTapped||[]),n];playTap(n);save();reboot()}));
- scope.querySelectorAll('input[type="radio"][name^="claim"]').forEach(el=>el.addEventListener('change',()=>{let i=Number(el.name.replace('claim',''));state.verdict[i]=el.value==='T';save()}));
+ scope.querySelectorAll('[data-wave]').forEach(el=>el.addEventListener('click',()=>{const [side,n]=el.dataset.wave.split(':');if(mutate(s=>{s[side==='A'?'waveA':'waveB']=Number(n);})){sfx.blip(430,.05,'sine',.012);reboot();}}));
+ scope.querySelectorAll('[data-bit]').forEach(el=>el.addEventListener('click',()=>{let i=Number(el.dataset.bit);if(mutate(s=>{const b=[...s.bits];b[i]=b[i]==='1'?'0':'1';s.bits=b.join('');})){sfx.blip(660,.04,'square',.01);reboot();}}));
+ scope.querySelectorAll('[data-trace]').forEach(el=>el.addEventListener('click',()=>{let id=el.dataset.trace;if(mutate(s=>{s.traceOpen=s.traceOpen.includes(id)?s.traceOpen.filter(x=>x!==id):[...s.traceOpen,id];}))reboot()}));
+ scope.querySelectorAll('[data-mai]').forEach(el=>el.addEventListener('click',()=>{let n=Number(el.dataset.mai);if(!syncState())return;if(state.maiTapped.includes(n)){playTap(n);return}if(mutate(s=>{s.maiTapped.push(n);})){playTap(n);reboot();}}));
+ scope.querySelectorAll('input[type="radio"][name^="claim"]').forEach(el=>el.addEventListener('change',()=>{let i=Number(el.name.replace('claim',''));mutate(s=>{s.verdict[i]=el.value==='T';})}));
  const form=scope.querySelector('#answer-form');if(form)form.addEventListener('submit',e=>{e.preventDefault();const field=scope.querySelector('#answer-input');const raw=field?.value||'';submitInput(raw)});
- const capform=scope.querySelector('#capstone-form');if(capform)capform.addEventListener('submit',async e=>{e.preventDefault();const raw=scope.querySelector('#capstone-input')?.value||'';
-  if(released(D.steps[stepCount-1].day)&&state.stepUnlocked===stepCount&&await sha256Text(norm(raw))===finaleCapstoneHash){state.capstoneOk=true;save();resultMessage='';failStreak=0}
+ const capform=scope.querySelector('#capstone-form');if(capform)capform.addEventListener('submit',async e=>{e.preventDefault();if(!syncState())return;const raw=scope.querySelector('#capstone-input')?.value||'',ticket=epoch;
+  const hash=await sha256Text(norm(raw));if(!syncState()||ticket!==epoch)return;
+  if(released(D.steps[stepCount-1].day)&&state.stepUnlocked===stepCount&&hash===finaleCapstoneHash){if(!mutate(s=>{s.capstoneOk=true;}))return;resultMessage='';failStreak=0}
   else{failStreak++;resultMessage=rejectMsg();sfx.reject()}
-  const fb=document.getElementById('finale-body');if(fb){fb.innerHTML=finaleBody();wire(fb);animateIn(fb)}});
+  renderFinale();});
  }
- function reboot(){const body=document.getElementById('reader');
-  if(body&&curStep){body.innerHTML=recordBody(curStep.id);wire(body);animateIn(body)}
+ function renderFinale(preserve=true){const fb=document.getElementById('finale-body');if(fb)replaceView(fb,finaleBody(),preserve);}
+ function reboot(preserve=true){const body=document.getElementById('reader');
+  if(body&&curStep)replaceView(body,recordBody(curStep.id),preserve);
   updateProgress();
-  if(panelKind)renderPanel()}
- function bindNotes(nb){let el=nb.querySelector('#notes-field');if(el){el.addEventListener('input',()=>{state.notes=el.value;save()})}}
+  if(panelKind)renderPanel(preserve);renderStorageNotice();}
+ function bindNotes(nb){let el=nb.querySelector('#notes-field');if(el){el.addEventListener('input',()=>{const value=el.value;mutate(s=>{s.notes=value;});})}}
  function updateProgress(){const bar=document.getElementById('progress-bar'),cnt=document.getElementById('progress-count');
   if(bar)bar.style.width=(solvedCount()/stepCount*100).toFixed(1)+'%';
   if(cnt)cnt.textContent=progressLabel();
   const fl=document.getElementById('finale-link');if(fl)fl.hidden=state.stepUnlocked<stepCount}
- function reset(){const msg=zt('确定清除本设备的全部调查进度和笔记吗？此操作不可撤销。','Erase all investigation progress and notes on this device? This cannot be undone.');if(window.confirm(msg)){state=defaultState();resultMessage='';save();reboot();showToast(zt('调查进度已清除','Investigation progress erased'))}}
+ function reset(){if(!syncState())return;const ticket=epoch,msg=zt('确定清除本设备的全部调查进度和笔记吗？此操作不可撤销。','Erase all investigation progress and notes on this device? This cannot be undone.');if(window.confirm(msg)){if(!syncState()||ticket!==epoch)return;if(!mutate(s=>Object.assign(s,defaultState())))return;for(const k of Object.keys(recoveryDrafts))delete recoveryDrafts[k];resultMessage='';refreshFromState();showToast(durable?zt('调查进度已清除','Investigation progress erased'):zt('本页进度已清除；浏览器存储不可用，磁盘存档未确认清除。','Page progress cleared; browser storage is unavailable, so the stored save could not be confirmed erased.'));}}
  function downloadText(name,content){let blob=new Blob([content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2500)}
  function encodeSave(){const bytes=new TextEncoder().encode(JSON.stringify(state));let str='';for(let i=0;i<bytes.length;i++)str+=String.fromCharCode(bytes[i]);return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
  function decodeSave(s){const str=atob(String(s).trim().replace(/-/g,'+').replace(/_/g,'/'));const bytes=Uint8Array.from(str,c=>c.charCodeAt(0));return JSON.parse(new TextDecoder().decode(bytes))}
@@ -307,10 +429,11 @@ REEL-A / REEL-B：共享采样
  };
  function playTap(n){sfx.blip(230+n*32,.15,'sine',.03)}
  /* ===== 实体取件封存条（?seal=）：扫码即核验，页面无输入框 ===== */
- function readSealFromUrl(){const args=new URLSearchParams(window.location.search),seal=args.get('seal');if(seal){state.receivedSeal=seal;save();showToast(zt('已接收二维码携带的封存条。','Seal strip received from the QR code.'));args.delete('seal');const q=args.toString();try{history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash)}catch{}}}
+ function readSealFromUrl(){const args=new URLSearchParams(window.location.search),seal=args.get('seal');if(seal){if(!mutate(s=>{s.receivedSeal=seal;}))return;if(!durable)return;showToast(zt('已接收二维码携带的封存条。','Seal strip received from the QR code.'));args.delete('seal');const q=args.toString();try{history.replaceState(null,'',location.pathname+(q?'?'+q:'')+location.hash)}catch{}}}
  function maybeAutoSeal(){if(!state.receivedSeal)return;const idx=stepIdx('dropcoords');
   if(!isAccessible(idx)||idx!==state.stepUnlocked||state.solved.dropcoords)return;
-  sha256Text(norm(state.receivedSeal)).then(h=>{if(h===C.pickup.sealSha256){complete('dropcoords')}});
+  const ticket=epoch,seal=state.receivedSeal;
+  sha256Text(norm(seal)).then(h=>{if(!syncState()||ticket!==epoch||state.receivedSeal!==seal)return;if(h===C.pickup.sealSha256){complete('dropcoords')}});
  }
  // 源码层：控制台属于档案系统，只留记录，不给答案。
  const loreMap={
@@ -345,5 +468,11 @@ REEL-A / REEL-B：共享采样
   const fb=document.getElementById('finale-body');
   if(fb){REL='./';fb.innerHTML=finaleBody();emitConsole();wire(fb);animateIn(fb);return}
  }
+ if(window.addEventListener){window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY||e.key===null)syncState();});window.addEventListener('focus',()=>syncState());}
+ if(document.addEventListener){document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncState();});document.addEventListener('keydown',modalKeys);document.addEventListener('zephyr-before-language-change',e=>{if(storageUnavailable)e.preventDefault();});document.addEventListener('zephyr-language-change',()=>{
+  reboot();renderFinale();const veil=document.querySelector('.intro-veil:not(.closing)');if(veil)replaceView(veil,introBody());
+  const drawer=document.getElementById('drawer-title');if(drawer&&panelKind)drawer.textContent=panelKind==='evidence'?zt('开放证物','OPEN EVIDENCE'):zt('读者工作台','READER WORKBENCH');
+ });}
  readSealFromUrl();init();
+ renderStorageNotice();
 })();

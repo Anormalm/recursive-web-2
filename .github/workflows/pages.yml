@@ -18,7 +18,8 @@ jobs:
         with:
           node-version: '22'
       - run: node --test tests/*.test.mjs
-      - run: node scripts/build.mjs
+      - run: node scripts/build.mjs --base=/recursive-web-2/
+      - run: node scripts/build.mjs --base=/recursive-web-2/ --verify
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

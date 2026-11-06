@@ -3,5 +3,7 @@
 # 转录备注 011：robots.txt 属于档案系统的登记层，不属于任何卷宗。
 User-agent: *
 Disallow: /evidence/
+Disallow: /evidence/1986-reel-a.wav
+Disallow: /evidence/1986-reel-b.wav
 Disallow: /gm/
 Disallow: /core-17/
