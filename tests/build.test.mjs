@@ -11,6 +11,8 @@ for(const [name,base] of [['root','/'],['project','/recursive-web-2/']])test('pl
  const out=join(folder,name),args=[script,'--out-dir='+out,'--base='+base];
  execFileSync(process.execPath,args);execFileSync(process.execPath,[...args,'--verify']);
  for(const file of ['tests','scripts','gm','RELEASE.md','.github'])assert.equal(existsSync(join(out,file)),false);
+ assert.ok(existsSync(join(out,'js/story.js')));
+ for(const page of ['index.html','catalog.html','finale.html']){const h=readFileSync(join(out,page),'utf8');assert.ok(h.indexOf('src="js/story.js"')<h.indexOf('src="js/engine.js"'));assert.ok(h.includes('src="js/story.js"'));}
  const html=readFileSync(join(out,'404.html'),'utf8');assert.ok(html.includes('<base href="'+base+'" />'));
  const missing=new URL('unknown/deep/file','https://example.test'+base);
  assert.equal(new URL('index.html',new URL(base,missing)).pathname,base+'index.html');
