@@ -194,10 +194,11 @@ test('adopting an earlier save removes newly inaccessible pinned originals',()=>
 test('evidence cabinet groups only existing attachments and searches open metadata',()=>{
  const {t,ctx,D}=game();ctx.now=Date.parse('2026-11-06');t.setState({stepUnlocked:6});t.activateFile('dial');const before=t.encodeSave(),groups=t.evidenceGroups();
  assert.deepEqual(Array.from(groups[0].ids),Array.from(D.steps.find(s=>s.id==='dial').evidence));
- assert.equal(new Set(groups.flatMap(g=>Array.from(g.ids))).size,t.allEvidence().length);
+ assert.equal(new Set(groups.slice(0,2).flatMap(g=>Array.from(g.ids))).size,t.allEvidence().length);
+ assert.equal(new Set(groups.flatMap(g=>Array.from(g.ids))).size,t.availableMaterials().length);
  assert.ok(t.evidenceMatches('aWorkbook','维修台'));assert.ok(t.evidenceMatches('aWorkbook','１９４６'));assert.equal(t.evidenceMatches('aWorkbook','not present in metadata'),false);assert.equal(t.evidenceMatches('aTrace',''),false);
  const id='aWorkbook',saved=D.records[id].body;D.records[id].body='synthetic body-only marker';assert.equal(t.evidenceMatches(id,'synthetic body-only marker'),false);D.records[id].body=saved;
- assert.ok(t.evidencePicker().includes('id="evidence-search"'));assert.ok(t.evidenceBody(id).includes('data-pin-evidence="aWorkbook"'));assert.ok(t.evidenceBody(id).includes(saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')));
+ assert.ok(t.evidencePicker().includes('id="evidence-search"'));assert.ok(t.evidenceBody(id).includes('original-evidence'));assert.ok(t.evidenceBody(id).includes(saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')));
  assert.ok(!t.evidencePicker().includes('data-evidence-id="aTrace"'));assert.equal(t.encodeSave(),before);
 });
 test('canonical workbook and robots discovery match available evidence',()=>{

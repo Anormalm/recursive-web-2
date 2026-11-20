@@ -356,8 +356,17 @@ body[data-era="2026"] .station-top{border-bottom-color:var(--pale)}
 .story-purpose{border-left:3px solid var(--oxblood);padding-left:16px}
 .story-sources{margin:32px 0;border-top:1px solid var(--hair)}
 .story-source-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--hair)}
-.story-source-row label{font-family:var(--sans);font-size:14px;min-height:44px;display:flex;align-items:center;gap:10px}
-.story-source-row input,.story-options input{width:20px;height:20px;accent-color:var(--oxblood);flex:none}
+.story-sources>summary,.image-tools>summary{display:list-item;cursor:pointer;min-height:44px;padding:10px 0;font-family:var(--sans);font-size:14px;line-height:1.7;color:var(--ink-soft)}
+.story-sources:not([open]){margin:20px 0 0}
+.story-sources[open]>summary{margin-bottom:16px}
+.story-source-row .linkbtn{min-height:44px;text-align:left;line-height:1.7}
+.story-options input{width:20px;height:20px;accent-color:var(--oxblood);flex:none}
+.station-controls:empty{display:none}
+.station-controls>.linkbtn{border:0}
+.image-tools{margin-bottom:12px}
+.image-tools:not([open]) .image-toolbar{display:none}
+.history-file{border-bottom:1px solid var(--hair);padding:6px 0}
+.history-file>.linkbtn:last-child{font-size:13px;color:var(--ink-soft)}
 .story-options{padding:16px 0;margin:24px 0;border:0;border-top:1px solid var(--hair)}
 .story-options legend{font-family:var(--sans);font-size:14px;padding-right:12px}
 .story-options label{display:flex;align-items:flex-start;gap:12px;padding:16px 12px;margin:8px 0;border:1px solid var(--hair);cursor:pointer}
@@ -623,7 +632,7 @@ body>noscript{display:block;max-width:880px;margin:24px auto;padding:18px 24px;c
   .station .arrival-file:hover{border-color:var(--lamp)}
   .station .arrival-file:hover .folder-action{background:#864842;border-color:#864842}
   .linkbtn:hover,.dossier-item:hover{color:var(--stamp)}
-  .station-utilities button:hover,.station-controls button:not(:disabled):hover{border-color:var(--amber)}
+  .station-utilities button:hover,.station-controls button:not(:disabled):hover{color:var(--pale);border-color:var(--amber)}
   .station .mai-pad:hover{border-color:var(--ivory)}
   .station .wave-cell:hover{border-color:var(--amber)}
   .station .bit-btn:not(.is-flipped):hover{border-color:var(--amber)}

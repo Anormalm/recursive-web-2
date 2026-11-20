@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {game} from './game-fixture.mjs';
 const KEY='zephyr-zero-arg-v1';
 const setup=()=>{const g=game();g.ctx.now=Date.parse('2026-11-11');return g;};
-function resolve(g){let scene;while((scene=g.t.pendingScene())){assert.ok(g.t.commitScene(scene.id,scene.options[0].id,[scene.sources.find(id=>g.t.sourceAvailable(id))]));}}
+function resolve(g){let scene;while((scene=g.t.pendingScene())){assert.ok(g.t.commitScene(scene.id,scene.options[0].id,scene.fixedSources));}}
 function advance(g,n){resolve(g);for(let i=g.t.getState().stepUnlocked;i<n;i++){g.t.complete(g.D.steps[i].id);assert.equal(g.t.getState().stepUnlocked,i+1);resolve(g);}}
 test('fresh investigation requires source-backed opening and cannot complete through a deep route',()=>{const g=setup(),{t}=g;t.activateFile('registry');assert.equal(t.pendingScene().id,'c1-assignment');assert.equal(t.canInvestigate(0),false);t.complete('registry');assert.equal(t.getState().stepUnlocked,0);assert.equal(t.commitScene('c1-assignment','forged',['nHandover']),false);assert.equal(t.commitScene('c1-assignment',t.pendingScene().options[0].id,[]),false);resolve(g);assert.equal(t.canInvestigate(0),true);});
 test('all six chapters resolve source work without changing puzzle order or seal authority',()=>{const g=setup();advance(g,20);assert.equal(Object.keys(g.t.getState().story.records).length,17);assert.equal(g.t.canUnseal(),true);assert.equal(g.t.campaignClosed(),false);g.t.mutate(s=>s.capstoneOk=true);assert.equal(g.t.pendingScene().id,'c6-handover');resolve(g);assert.equal(g.t.campaignClosed(),true);assert.equal(Object.keys(g.t.getState().story.records).length,18);});
@@ -52,7 +52,7 @@ test('finale repaint preserves page scroll and focused source-reading container'
  const previous=source(),next=source();active=previous;
  g.ctx.document.activeElement=active;g.ctx.window.scrollX=0;g.ctx.window.scrollY=2400;
  g.ctx.window.scrollTo=(x,y)=>{assert.equal(x,0);assert.equal(y,2400);restored++;};
- const body={id:'finale-body',scrollLeft:0,scrollTop:0,contains:el=>el===previous,querySelector:()=>null,querySelectorAll:selector=>selector==='button,input,textarea,a,[tabindex]'?[next]:[],set innerHTML(value){g.ctx.window.scrollY=1200;}};
+ const body={id:'finale-body',scrollLeft:0,scrollTop:0,contains:el=>el===previous,querySelector:()=>null,querySelectorAll:selector=>selector==='button,input,textarea,a,summary,[tabindex]'?[next]:[],set innerHTML(value){g.ctx.window.scrollY=1200;}};
  g.t.replaceView(body,'new localized source');assert.equal(focused,1);assert.equal(restored,1);
  g.ctx.window.scrollY=2400;g.t.replaceView(body,'deliberate new scene',false);assert.equal(restored,1);
 });
