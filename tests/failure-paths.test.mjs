@@ -113,3 +113,37 @@ test('actual parity rejection and stale owner cannot change progress',async()=>{
  const g=setup();advance(g,8);g.t.activateFile('parity');const button=control({act:'check-hamming'});g.t.wire(scopeFor({}, {'[data-act]':[button]}));await button.handlers.click({detail:0});assert.equal(g.t.getState().stepUnlocked,8);
  g.t.activateFile('registry');await button.handlers.click({detail:0});assert.equal(g.t.getState().stepUnlocked,8);
 });
+test('external replacement recovers a hidden frontier draft without merging it into the save',()=>{
+ const g=setup({storage:new Map([[KEY,JSON.stringify({v:1,stepUnlocked:1})]])});g.t.activateFile('institution');
+ g.elements['answer-input']={value:'frontier reasoning',selectionStart:0,selectionEnd:0};assert.ok(g.t.activateFile('registry'));delete g.elements['answer-input'];
+ g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:0,notes:'replacement'}));assert.equal(g.t.syncState(),false);
+ assert.equal(g.t.getRecovery()['answer-input:institution'],'frontier reasoning');assert.equal(Object.keys(g.t.getStation().drafts).length,0);
+ const exported=g.t.decodeSave(g.t.encodeSave());assert.equal(exported.stepUnlocked,0);assert.equal(exported.notes,'replacement');assert.ok(!JSON.stringify(exported).includes('frontier reasoning'));
+});
+test('import recovers multiple file drafts separately and reset clears recovery',async()=>{
+ const g=setup({storage:new Map([[KEY,JSON.stringify({v:1,stepUnlocked:4})]])});
+ for(const id of ['registry','institution']){g.t.activateFile(id);g.elements['answer-input']={value:'working '+id,selectionStart:0,selectionEnd:0};g.t.activateFile('namecode');delete g.elements['answer-input'];}
+ const run=imported(g);g.elements['save-import']={value:encode({v:1,stepUnlocked:0,notes:'imported'})};await run();
+ for(const id of ['registry','institution'])assert.equal(g.t.getRecovery()['answer-input:'+id],'working '+id);
+ assert.equal(g.t.getState().notes,'imported');assert.equal(g.t.getState().stepUnlocked,0);g.t.reset();assert.equal(Object.keys(g.t.getRecovery()).length,0);
+});
+test('mounted draft edits and deliberate clearing supersede their retained snapshot',()=>{
+ for(const value of ['latest mounted text','']){const g=setup();resolveScenes(g);g.t.activateFile('registry');g.t.getStation().drafts.registry={value:'older snapshot'};g.elements['answer-input']={value};
+ g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:0,notes:'replacement'}));g.t.syncState();assert.equal(g.t.getRecovery()['answer-input:registry'],value||undefined);}
+});
+test('later replacements keep unrelated recovered file drafts',()=>{
+ const g=setup();g.t.getStation().drafts.registry={value:'first working text'};g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:1}));g.t.syncState();
+ g.t.getStation().drafts.institution={value:'second working text'};g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:0}));g.t.syncState();
+ assert.equal(g.t.getRecovery()['answer-input:registry'],'first working text');assert.equal(g.t.getRecovery()['answer-input:institution'],'second working text');
+});
+test('stale and missing-choice story feedback translate without committing or saving',()=>{
+ for(const missing of [false,true]){const g=setup();if(missing)advance(g,1);if(missing){g.t.complete('institution');}g.t.activateFile(missing?'institution':'registry');
+ const scene=g.t.pendingScene(),button=control({scene:scene.id,epoch:String(g.t.getEpoch())});g.t.wire(scopeFor({}, {'[data-scene][data-act="commit-story"]':[button]}));if(!missing)g.t.mutate(s=>s.notes='change after paint');
+ button.handlers.click();const saved=g.t.encodeSave();assert.match(g.t.storyDock(scene),missing?/请先选一项/:/记录已变/);g.ctx.document.documentElement={dataset:{lang:'en'}};g.listeners['zephyr-language-change']();
+ assert.match(g.t.storyDock(scene),missing?/Choose an option first/:/The record changed/);assert.equal(g.t.encodeSave(),saved);assert.equal(g.t.getState().story.records[scene.id],undefined);}
+});
+test('finale action navigation retains explicit URL language and original-view intent',async()=>{
+ for(const action of ['nav','review-original'])for(const lang of ['en','zh']){const g=setup({search:'?lang='+lang+'&view=stale#ignored'});g.ctx.location.pathname='/recursive-web-2/finale.html';g.elements['finale-body']={};g.t.setState(g.t.ingestState({v:1,stepUnlocked:20,capstoneOk:true}));
+ const button=control({act:action,rec:'registry'});g.t.wire(scopeFor({}, {'[data-act]':[button]}));await button.handlers.click({detail:0});const target=new URL(g.ctx.location.href,'https://example.test/recursive-web-2/finale.html');
+ assert.equal(target.pathname,'/recursive-web-2/index.html');assert.equal(target.searchParams.get('lang'),lang);assert.equal(target.searchParams.get('rec'),'registry');assert.equal(target.searchParams.get('view'),action==='review-original'?'original':null);}
+});

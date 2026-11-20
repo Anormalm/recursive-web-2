@@ -463,6 +463,23 @@ body[data-era="2026"] .station-top{border-bottom-color:var(--pale)}
 .image-scroll img,.station .image-scroll img{display:block;width:calc(100% * var(--image-zoom,1));max-width:none;height:auto;object-fit:contain}
 .image-inspector figcaption,.image-inspector .scroll-hint{margin-top:10px;font-size:14px;line-height:1.8;color:var(--muted)}
 
+/* Optional reading aids: separate from the preserved originals. */
+.task-guidance{min-width:0;max-width:80ch;margin:24px 0;padding:14px 0;border-top:1px solid var(--hair);font-family:var(--sans);font-size:15px;line-height:1.85;color:var(--ink);overflow-wrap:anywhere}
+.task-guidance summary{cursor:pointer;min-height:44px;padding:8px 0;font-weight:600}
+.task-guidance p{margin:12px 0}
+.task-guidance pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;font-family:var(--serif);font-size:16px;line-height:1.9}
+.task-guidance .field-status{font-weight:600}
+.answer-contract{font-family:var(--sans);font-size:15px;line-height:1.8;margin:0 0 12px;color:inherit}
+.sample-tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.sample-tables table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.sample-tables caption{text-align:left;padding:10px 0;font-weight:600}
+.sample-tables th,.sample-tables td{padding:6px 8px;border-bottom:1px solid var(--hair);text-align:right;overflow-wrap:anywhere}
+.sample-tables thead th{font-family:var(--sans);font-weight:500}
+.earned-sample-digest{margin-top:24px;font-size:15px;line-height:1.8}
+.earned-sample-digest code{display:block;max-width:100%;overflow-wrap:anywhere;user-select:text}
+.arrival-view>.task-guidance{grid-column:1 / -1;color:var(--ivory);border-color:#635D4E;margin:0}
+@media(max-width:520px){.sample-tables{grid-template-columns:minmax(0,1fr)}}
+
 /* ===== Arrival: overhead table, one actual file ready to open ===== */
 .station-page #reader.station[data-kind="arrival"]{
   --ink:var(--ivory);--ink-soft:var(--pale);--focus:var(--lamp);
@@ -866,7 +883,7 @@ body.station-page[data-pointer-input="true"] :is(.finding-dock .btn,.receipt-act
   a,a:visited,.muted,.tiny,.k{color:#000}
   .station-page #reader.station[data-kind="arrival"]{padding:0;background:#fff;color:#000}
   .station .arrival-view{display:block;margin:0;padding:0;color:#000}
-  .station .arrival-institution,.station .arrival-title,.station .arrival-subtitle,.station .arrival-description,.station .arrival-notice{color:#000}
+  .station .arrival-institution,.station .arrival-title,.station .arrival-subtitle,.station .arrival-description,.station .arrival-notice,.task-guidance,.arrival-view>.task-guidance{color:#000}
   .station .task-pane,.station .pin-pane,.station .task-pane>.surface-scroll,.station .task-pane .artifact-content,.station .compare-original,.station .receipt-view{background:#fff !important;background-image:none !important;box-shadow:none !important;border-radius:0}
   .station .task-pane .artifact-content,.station[data-kind="earth"] .task-pane .artifact-content,.station:is([data-kind="provenance"],[data-kind="verdict"]) .task-pane .artifact-content,.station .receipt-view{max-width:none;padding:0;margin:0;border:0}
   .station .task-pane>.surface-head{color:#000;background:#fff;box-shadow:none}
