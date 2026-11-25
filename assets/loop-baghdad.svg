@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" role="img" aria-label="Baghdad tax register, holder field blank">
+ <rect width="320" height="400" fill="#E6DCC4"/>
+ <rect x="13" y="13" width="294" height="374" fill="none" stroke="#A08E68" stroke-width="1.5"/>
+ <rect x="24" y="54" width="272" height="286" fill="none" stroke="#C4B18A" stroke-width="1"/>
+ <text x="24" y="40" font-family="Courier New, monospace" font-size="13" fill="#4A3B22">BAG-17</text>
+ <text x="296" y="112" direction="rtl" text-anchor="end" font-family="'Geeza Pro', 'Noto Naskh Arabic', serif" font-size="24" fill="#3D2F1C">اسم المالك بياض</text>
+ <text x="24" y="146" font-size="11" fill="#6E5C3C">the owner’s name is blank</text>
+ <line x1="24" y1="192" x2="214" y2="192" stroke="#A08E68" stroke-width="1.5"/>
+ <text x="24" y="216" font-size="11" fill="#6E5C3C">HOLDER / 持有人</text>
+ <text x="296" y="262" direction="rtl" text-anchor="end" font-family="'Geeza Pro', 'Noto Naskh Arabic', serif" font-size="13" fill="#743C37">لا تملأ</text>
+ <g stroke="#C4B18A" stroke-width="1"><line x1="24" y1="292" x2="296" y2="292"/><line x1="24" y1="310" x2="296" y2="310"/></g>
+ <g transform="translate(252,338)"><rect width="26" height="26" fill="none" stroke="#743C37" stroke-width="2"/><line x1="0" y1="0" x2="26" y2="26" stroke="#743C37" stroke-width="2"/></g>
+ <text x="24" y="378" font-size="10" fill="#6E5C3C">c. 950 · BAGHDAD</text>
+</svg>

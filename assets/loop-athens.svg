@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" role="img" aria-label="Athenian stone transcription, handler field blank">
+ <rect width="320" height="400" fill="#D8D8D2"/>
+ <rect x="13" y="13" width="294" height="374" fill="none" stroke="#8F8F86" stroke-width="2"/>
+ <text x="24" y="40" font-family="Courier New, monospace" font-size="13" fill="#3E3E3A">ATH-17</text>
+ <path d="M208 58 l16 10 -4 14 -14 2 -8 -12 z" fill="#C9C9C1"/>
+ <text x="24" y="112" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#3E3E3A">τὸ ὄνομα</text>
+ <text x="24" y="144" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#3E3E3A">οὐ γέγραπται</text>
+ <text x="24" y="172" font-size="11" fill="#6E6E66">the name has not been written</text>
+ <line x1="24" y1="214" x2="214" y2="214" stroke="#8F8F86" stroke-width="2"/>
+ <text x="24" y="238" font-size="11" fill="#6E6E66">HANDLER / 经手人</text>
+ <g stroke="#B9B9B0" stroke-width="1"><line x1="24" y1="284" x2="296" y2="274"/><line x1="24" y1="300" x2="296" y2="292"/><line x1="24" y1="318" x2="296" y2="312"/></g>
+ <g transform="translate(252,336)"><rect width="26" height="26" fill="none" stroke="#743C37" stroke-width="2"/><line x1="0" y1="0" x2="26" y2="26" stroke="#743C37" stroke-width="2"/></g>
+ <text x="24" y="376" font-size="10" fill="#6E6E66">c. 450 BCE · ATHENS</text>
+</svg>

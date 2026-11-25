@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {game} from './game-fixture.mjs';
 const KEY='zephyr-zero-arg-v2';
 const setup=()=>{const g=game();g.ctx.now=Date.parse('2026-11-11');return g;};
@@ -82,8 +82,11 @@ test('nine-era multilingual loop register is complete and only renders after cam
  const g=setup(),loops=g.ctx.window.ZEPHYR_STORY.loops;
  assert.equal(loops.length,9);
  for(const l of loops){for(const key of ['era','lang','record','blank','missing','left','closed'])assert.equal(typeof l[key]?.zh,'string',key),assert.equal(typeof l[key]?.en,'string',key);assert.equal(typeof l.line,'string');}
+ const plates=loops.filter(l=>l.image);
+ assert.equal(plates.length,5);
+ for(const l of plates){assert.match(l.image,/^assets\/loop-[a-z]+\.svg$/);assert.ok(existsSync(new URL('../'+l.image,import.meta.url)),l.image);assert.equal(typeof l.alt?.zh,'string');assert.equal(typeof l.alt?.en,'string');assert.match(l.catalog,/^\w+-\d+$/);}
  assert.doesNotMatch(g.t.finaleView(),/loop-register/);
  advance(g,20);await verifyReceipt(g);g.t.mutate(s=>s.capstoneOk=true);resolve(g);
  assert.equal(g.t.campaignClosed(),true);
- const html=g.t.finaleView();assert.match(html,/loop-register/);assert.match(html,/loop-line/);assert.match(html,/苏美尔/);assert.match(html,/这一轮/);
+ const html=g.t.finaleView();assert.match(html,/loop-register/);assert.match(html,/loop-plate/);assert.match(html,/assets\/loop-nippur\.svg/);assert.match(html,/loop-line/);assert.match(html,/苏美尔/);assert.match(html,/这一轮/);
 });

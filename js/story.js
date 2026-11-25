@@ -165,13 +165,13 @@
      '许闻舟留下的修订说明能证明他收回过自己的使用建议，但单凭它证不了每条旧材料是怎么形成的。林澄的申请能证明她提过申请，证不了里面每一个怀疑。综合组的移交清点只算收到的电子材料，不会替从没入库的载体开接收证明。',
      '清单上有几处署名栏是空的。空着就让它空着，已有的经办文字照留。空栏的原因可能很多，材料里没指明是哪一个。别为了让结项表好看就填一个人，也别因为填不出人就写“系统自行决定”。',
      '后续责任要写成能办的事：材料保管岗位核对形成和移交记录，复核岗位处理异议，有权的人事岗位另查联系记录。这里的工作副本不往任何岗位发材料，没有联系人，也没有可用的投诉渠道。下一位得在本站之外依法确认谁来接收。',
-     '旧库房最底层还有一册线装登记簿，重装过三次。栏序、七组索引、缺持有人栏，和 1946 年这张一样。年代页被裁掉，只剩馆里最老的藏品卡写着“第三次重装”。林澄从外馆目录抄回的几行更早：尼普尔的泥板、雅典的石刻、汉代木牍、巴格达的税册。技术比对只能说明格式相同，证不了谁抄了谁。CORE-17 有人读作目录编号，也有人读作这一格式的第十七次登记；两种读法都还没有原始著录。'
+     '旧库房最底层还有一册线装登记簿，重装过三次。栏序、七组索引、缺持有人栏，和 1946 年这张一样。年代页被裁掉，只剩馆里最老的藏品卡写着“第三次重装”。林澄从外馆目录抄回的几行更早：尼普尔的泥板、雅典的石刻、汉代木牍、巴格达的税册；每份空白栏旁都有同一个方框斜线记号。技术比对只能说明格式相同，证不了谁抄了谁。CORE-17 有人读作目录编号，也有人读作这一格式的第十七次登记；两种读法都还没有原始著录。'
     ],[
      'Put this page before the final audit; it does not replace the audit. Keep three things apart: the technical findings, whether the handling was sound, and where the people went. Finishing the first does not fill the other two. If you sign a closing statement, say which field you are signing.',
      'Xu’s retained revision shows that he withdrew his own recommendation. On its own it cannot show how each old item was formed. Lin’s request shows that she asked for a review, not that every suspicion in it was true. The general affairs transfer count covers electronic material actually received. It cannot issue a receipt for a carrier that never entered the archive.',
      'Several signature fields are blank. Leave them blank, and keep the handling text that is there. There may be many reasons; our material names none. Do not fill in a person to make the closing form look complete, and do not write “the system decided” because no name can be found.',
      'Write the follow-up as things someone can do: custody staff check formation and transfer records; review staff handle the objections; personnel staff with authority examine contact records. This working copy sends nothing to any office. It carries no contact and no working complaints channel. The next worker must find a lawful receiving arrangement outside this site.',
-     'At the bottom of the old store is a thread-bound register, rebound three times. The column order, the seven-group index and the missing holder field all match the 1946 sheet. The date page has been cut out; only the oldest holdings card says “third rebinding.” The lines Lin copied from outside catalogues are older: a Nippur tablet, an Athenian stone, Han wooden slips, a Baghdad tax register. Technical comparison can show a shared form, not who copied whom. Some read CORE-17 as a directory number; others as the seventeenth registration in this format. Neither reading has an original description.'
+     'At the bottom of the old store is a thread-bound register, rebound three times. The column order, the seven-group index and the missing holder field all match the 1946 sheet. The date page has been cut out; only the oldest holdings card says “third rebinding.” The lines Lin copied from outside catalogues are older: a Nippur tablet, an Athenian stone, Han wooden slips, a Baghdad tax register; each carries the same boxed diagonal mark beside its blank field. Technical comparison can show a shared form, not who copied whom. Some read CORE-17 as a directory number; others as the seventeenth registration in this format. Neither reading has an original description.'
     ])
    },
    nLastNote: {
@@ -723,6 +723,7 @@
    {
     era:b('约前 1750 · 尼普尔','c. 1750 BCE · Nippur'),
     lang:b('苏美尔语 · 楔形文字转写','Sumerian · cuneiform transliteration'),
+    catalog:'NIP-17',image:'assets/loop-nippur.svg',alt:b('尼普尔泥板抄件：空白持有人栏，右下角有方框斜线记号','Nippur tablet transcription: blank holder field with a boxed diagonal mark at lower right'),
     line:'MU NU.SAR',
     record:b('泥板借贷清单。名未书，持有人栏空着。','Clay loan list. The name is not written; the holder field is empty.'),
     blank:b('持有人栏','Holder field'),
@@ -733,6 +734,7 @@
    {
     era:b('约前 450 · 雅典','c. 450 BCE · Athens'),
     lang:b('古希腊语 · 石刻','Ancient Greek · stone'),
+    catalog:'ATH-17',image:'assets/loop-athens.svg',alt:b('雅典石刻抄件：空白经手人栏，右下角有方框斜线记号','Athenian stone transcription: blank handler field with a boxed diagonal mark at lower right'),
     line:'τὸ ὄνομα οὐ γέγραπται',
     record:b('神庙财产清单。经手人一栏空着。','Temple inventory. The handler field is empty.'),
     blank:b('经手人栏','Handler field'),
@@ -743,6 +745,7 @@
    {
     era:b('约前 100 · 汉','c. 100 BCE · Han'),
     lang:b('古汉语 · 木牍','Classical Chinese · wooden slips'),
+    catalog:'HAN-17',image:'assets/loop-han.svg',alt:b('汉代木牍抄件：空白持有人栏，右下角有方框斜线记号','Han wooden-slip transcription: blank holder field with a boxed diagonal mark at lower right'),
     line:'持有人闕，勿補',
     record:b('木牍簿籍。持有人一栏空着，七组编号。','Wooden-slip register. The holder field is empty; seven groups of numbers.'),
     blank:b('持有人栏','Holder field'),
@@ -753,6 +756,7 @@
    {
     era:b('约 850 · 修道院','c. 850 · monastery'),
     lang:b('拉丁语 · 羊皮纸','Latin · parchment'),
+    catalog:'LAT-17',image:'assets/loop-latin.svg',alt:b('修道院羊皮纸抄件：空白持有人栏，右下角有方框斜线记号','Carolingian parchment transcription: blank holder field with a boxed diagonal mark at lower right'),
     line:'Nomen possessoris deest.',
     record:b('修道院财产清册。持有人一栏空着。','Monastic property inventory. The holder field is empty.'),
     blank:b('持有人栏','Holder field'),
@@ -763,6 +767,7 @@
    {
     era:b('约 950 · 巴格达','c. 950 · Baghdad'),
     lang:b('阿拉伯语 · 纸册','Arabic · paper register'),
+    catalog:'BAG-17',image:'assets/loop-baghdad.svg',alt:b('巴格达纸册抄件：空白持有人栏，右下角有方框斜线记号','Baghdad paper-register transcription: blank holder field with a boxed diagonal mark at lower right'),
     line:'اسم المالك بياض',
     dir:'rtl',
     record:b('税务登记册。持有人一栏空着。','Tax register. The holder field is empty.'),

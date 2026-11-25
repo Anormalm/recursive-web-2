@@ -395,6 +395,12 @@ The ancient and non-Chinese entries are presented as lines Lin copied from outsi
 
 Verified: `node --check`, 153/153 tests including a new structural/post-closure render check for the nine-entry multilingual register, rebuilt byte-verified player artifact, and 375/1280 browser renders with no horizontal overflow and correct right-to-left rendering. Protected `finaleBody`, interlude/acrostic and handover fingerprints remain unchanged. No commit, push or deployment.
 
+### Loop plates and clue
+
+Five generated SVG transcriptions (`assets/loop-nippur.svg`, `loop-athens.svg`, `loop-han.svg`, `loop-latin.svg`, `loop-baghdad.svg`) render beside the first five loop entries after campaign closure. Each shows a period line, a blank holder or handler field, and the same boxed diagonal mark. The mark is also named in the `nAudit` exhibit and in the register’s caveat. A new 2026-02-18 staff-log entry records Lin’s five external catalogue numbers (NIP-17, ATH-17, HAN-17, LAT-17, BAG-17), giving the plates a diegetic source without adding a required puzzle step.
+
+The ancient lines are short period-style phrases with Chinese/English context, not certified translations or new historical evidence. The images are static SVG with no external requests; the build copies the assets directory. Verified: 153/153 tests including SVG existence and post-closure rendering, byte-verified artifact, and 375/1280 browser rendering with all five plates loaded and no horizontal overflow. These additions are local and were not part of the pushed commit.
+
 ### Branch publication
 
 The user subsequently authorized committing this checkpoint and pushing it to `fix/player-playability-repairs`. The `Player site` workflow triggers only on `main`; this branch push does not deploy or change the public site. No merge, Pages setting change or deployment is authorized by this entry.
