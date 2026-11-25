@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
-  <meta name="theme-color" content="#2b2014" />
+  <meta name="theme-color" content="#FAFAF7" />
   <meta name="description" content="泽风计划馆藏目录：历史无线电维护档案数字化卷目一览。" data-en="Project Zephyr catalog: digitized volumes of the historic radio maintenance archives." />
   <title data-en="Catalog · Project Zephyr">馆藏目录 · 泽风计划</title>
   <link rel="stylesheet" href="styles.css" />
@@ -14,24 +14,24 @@
   <script defer src="data.js"></script>
   <script defer src="js/story.js"></script>
   <script defer src="js/task-guidance.js"></script>
+  <script defer src="js/archive-topology.js"></script>
   <script defer src="js/engine.js"></script>
   <script defer src="js/game-ui.js"></script>
-  <!-- 转录备注 011：目录顺序即阅览顺序。这不是巧合。 -->
   <!-- 恢复残片 · 第 042 号卷宗 / 分发记录：SEGMENT INDEX :: GSV YFROWRMT -->
   <!-- 残片注记（仅此一处）：渠道代号依序拼合 · 各段解码方式不一 -->
   <!-- 残片状态：本段未注销 · ARCHIVE-DEPT 一段已注销，不计入 -->
 </head>
-<body class="companion-page catalog-page">
- <header class="top">
-  <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
-  <div class="top-inner">
-   <a class="brand" href="index.html"><span class="i18n-zh">南屿市档案馆<small>泽风计划</small></span><span class="i18n-en">NANYU MUNICIPAL ARCHIVES<small>PROJECT ZEPHYR</small></span></a>
-   <nav class="top-nav" aria-label="页面导航 / Page navigation">
-    <a href="index.html"><span class="i18n-zh">调查桌</span><span class="i18n-en">Investigation desk</span></a>
-    <a href="catalog.html" aria-current="page"><span class="i18n-zh">档案柜</span><span class="i18n-en">File cabinet</span></a>
-    <a href="log.html"><span class="i18n-zh">工作记录</span><span class="i18n-en">Staff notes</span></a>
-    <a href="index.html#panel"><span class="i18n-zh">笔记</span><span class="i18n-en">Notes</span></a>
-   </nav>
+<body class="companion-page catalog-page station-page">
+ <header class="top station-top">
+  <a class="station-brand" href="index.html">Z-00</a>
+  <nav class="archive-nav" aria-label="页面导航 / Page navigation">
+   <a href="index.html"><span class="i18n-zh">阅览</span><span class="i18n-en">Reading</span></a>
+   <a href="catalog.html" aria-current="page"><span class="i18n-zh">目录</span><span class="i18n-en">Catalog</span></a>
+   <a href="log.html"><span class="i18n-zh">工作记录</span><span class="i18n-en">Staff notes</span></a>
+  </nav>
+  <div class="station-utilities">
+   <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
+   <button id="session-menu" class="btn" data-act="panel" data-panel="menu"><span class="i18n-zh">工具</span><span class="i18n-en">Tools</span></button>
   </div>
  </header>
 
@@ -40,39 +40,33 @@
    <header class="rec-meta companion-heading">
     <span class="rec-no">CATALOG / WX-ZF</span>
     <h1 class="rec-title"><span class="i18n-zh">馆藏目录</span><span class="i18n-en">Catalog</span></h1>
-    <span class="rec-status"><span class="i18n-zh">历史无线电维护档案 · 数字化阅览卷目 20 卷</span><span class="i18n-en">Historic radio maintenance archives · 20 volumes digitized for reading</span></span>
    </header>
-   <p class="muted cat-intro"><span class="i18n-zh">在线阅览按目录顺序开放：完成各卷「修复校验」后，方可查阅下一卷。检索不到的档号不属于本馆目录。</span><span class="i18n-en">Online reading opens in catalog order: complete each volume's verification before the next volume becomes readable. File numbers that return nothing from the search are not part of this catalog.</span></p>
-   <ul class="cat-list">
-    <li class="cat-row" data-step="registry"><span class="cat-no">WX-1946-011</span><a href="index.html?rec=registry"><span class="i18n-zh">无线电设备登记表（持有人栏缺失）</span><span class="i18n-en">Radio equipment registry (holder field missing)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="institution"><span class="cat-no">WX-1946-012</span><a href="index.html?rec=institution"><span class="i18n-zh">档案A附件（双印章存疑页）</span><span class="i18n-en">Archive A annex (page with two disputed stamps)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="namecode"><span class="cat-no">WX-1946-013</span><a href="index.html?rec=namecode"><span class="i18n-zh">值班名单附页（索引七组）</span><span class="i18n-en">Duty roster supplement (seven index groups)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="building"><span class="cat-no">WX-1986-021</span><a href="index.html?rec=building"><span class="i18n-zh">校园建筑名称变更备忘（复印件）</span><span class="i18n-en">Campus building name-change memo (photocopy)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="reelnote"><span class="cat-no">WX-1986-022</span><a href="index.html?rec=reelnote"><span class="i18n-zh">第二卷录音夹页（密文纸条）</span><span class="i18n-en">Second recording insert (encrypted note)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="reels"><span class="cat-no">WX-1986-023</span><a href="index.html?rec=reels"><span class="i18n-zh">数字采样列表（REEL-A / REEL-B）</span><span class="i18n-en">Digital sample list (REEL-A / REEL-B)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="dial"><span class="cat-no">WX-1986-031</span><a href="index.html?rec=dial"><span class="i18n-zh">十三触点信号转盘图</span><span class="i18n-en">Thirteen-contact signal dial diagram</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="tracks"><span class="cat-no">WX-1986-032</span><a href="index.html?rec=tracks"><span class="i18n-zh">双轨信号修复记录图</span><span class="i18n-en">Dual-track signal repair diagram</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="parity"><span class="cat-no">WX-1986-033</span><a href="index.html?rec=parity"><span class="i18n-zh">电气工程校验记录（三个接收字）</span><span class="i18n-en">Electrical engineering verification record (three received words)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="noisewords"><span class="cat-no">WX-1986-034</span><a href="index.html?rec=noisewords"><span class="i18n-zh">双卷原始录音（未数字化文件）</span><span class="i18n-en">Two original recordings (undigitized files)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="audit"><span class="cat-no">WX-1986-041</span><a href="index.html?rec=audit"><span class="i18n-zh">1986年影印件（含异常插入行）</span><span class="i18n-en">1986 photocopy (with an anomalous inserted line)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="hiddenindex"><span class="cat-no">ZF-2026-042</span><a href="index.html?rec=hiddenindex"><span class="i18n-zh">第042号卷宗（数字化失败）</span><span class="i18n-en">Volume 042 (digitization failed)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="dropcoords"><span class="cat-no">ZF-2026-043</span><a href="index.html?rec=dropcoords"><span class="i18n-zh">取件通知（Z-00）</span><span class="i18n-en">Collection notice (Z-00)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="newsclip"><span class="cat-no">WX-1986-044</span><a href="index.html?rec=newsclip"><span class="i18n-zh">剪角报纸残件（1986）</span><span class="i18n-en">Newspaper fragment with a clipped corner (1986)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="annex"><span class="cat-no">WX-1986-052</span><a href="index.html?rec=annex"><span class="i18n-zh">B柜英文维修附录（两列索引）</span><span class="i18n-en">Cabinet B English maintenance annex (two-column index)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="recursion"><span class="cat-no">ZF-2026-061</span><a href="index.html?rec=recursion"><span class="i18n-zh">旧档引用件（递归残档）</span><span class="i18n-en">Old archive reference (recursive remnants)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="provenance"><span class="cat-no">ZF-2026-071</span><a href="index.html?rec=provenance"><span class="i18n-zh">四份材料处理日志摘录</span><span class="i18n-en">Processing log excerpts for four documents</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="triangulate"><span class="cat-no">ZF-2026-073</span><a href="index.html?rec=triangulate"><span class="i18n-zh">外业复核记录（三处基点）</span><span class="i18n-en">Field verification record (three reference points)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="masterkey"><span class="cat-no">ZF-2026-081</span><a href="index.html?rec=masterkey"><span class="i18n-zh">加密封存的原始审计表</span><span class="i18n-en">Encrypted and sealed original audit sheet</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
-    <li class="cat-row" data-step="judgment"><span class="cat-no">ZF-2026-082</span><a href="index.html?rec=judgment"><span class="i18n-zh">审计判断表（六行）</span><span class="i18n-en">Audit judgment sheet (six rows)</span></a><span class="cat-status"><span class="i18n-zh">开放阅览</span><span class="i18n-en">Available for reading</span></span></li>
+   <p class="muted cat-intro"><span class="i18n-zh">现开放原件。</span><span class="i18n-en">Originals open now.</span></p>
+   <form id="catalog-search-form" class="catalog-search" role="search">
+    <label id="catalog-search-label" for="catalog-search"><span class="i18n-zh">检索</span><span class="i18n-en">Search</span></label>
+    <input id="catalog-search" type="search" aria-describedby="catalog-search-help" aria-controls="catalog-files" autocomplete="off" spellcheck="false" />
+    <p id="catalog-search-help" class="tiny"><span class="i18n-zh">查档号、题名、日期或类型。正文不参与检索。</span><span class="i18n-en">Search the file number, title, date or type. Bodies aren’t searched.</span></p>
+   </form>
+   <ul id="catalog-files" class="cat-list">
+    <li class="cat-row" data-record="registry"><span class="cat-no">WX-1946-011</span><div class="cat-entry"><a href="index.html?rec=registry"><span class="i18n-zh">无线电设备登记表（持有人栏缺失）</span><span class="i18n-en">Radio equipment registry (holder field missing)</span></a></div></li>
    </ul>
-   <p class="tiny" style="margin-top:26px"><span class="i18n-zh">其余 120 卷（值班日志、零件清单、会议记录、工资表、设备报废单等）已数字化，暂不提供在线阅览。CORE-17 为历史处理系统遗留的未编目目录，不对外开放。</span><span class="i18n-en">The remaining 120 volumes (duty logs, parts lists, meeting minutes, payroll, equipment write-off sheets, etc.) are digitized but not yet available online. CORE-17 is an uncatalogued directory left behind by a legacy processing system and is not open to the public.</span></p>
+   <p id="catalog-empty" class="muted" role="status" aria-live="polite" hidden><span class="i18n-zh">暂无开放原件。</span><span class="i18n-en">No originals open yet.</span></p>
+   <noscript><p class="muted"><span class="i18n-zh">启用 JavaScript 才能检索其他原件；这一件仍可直接打开。</span><span class="i18n-en">Enable JavaScript to search other originals. This one still opens directly.</span></p></noscript>
+   <details class="catalog-note">
+    <summary><span class="i18n-zh">馆藏说明</span><span class="i18n-en">Holdings note</span></summary>
+    <p><span class="i18n-zh">其余 120 卷（值班日志、零件清单、会议记录、工资表、报废单等）已数字化，暂不开放。CORE-17 是旧处理系统留下的未编目目录，不对外开放。</span><span class="i18n-en">The other 120 volumes — duty logs, parts lists, minutes, payroll, write-off sheets — are digitized but not online. CORE-17 is an uncatalogued directory left by the old processing system; it stays closed.</span></p>
+   </details>
   </div>
  </main>
 
+ <div id="backdrop"></div>
+ <aside id="drawer" aria-labelledby="drawer-title" aria-hidden="true" inert>
+  <div class="drawer-head"><span id="drawer-title">工具</span><button class="drawer-close" id="drawer-close" aria-label="关闭 / Close">×</button></div>
+  <div id="drawer-body"></div>
+ </aside>
  <footer>
-  <span class="i18n-zh">南屿市档案馆 版权所有 · 泽风计划（2024—2026） · 本站自 2026 年 10 月起转为静态存档<br />调查记录保存在本机浏览器。</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026) · This site has been a static archive since October 2026<br />Investigation progress stays in this browser.</span>
+  <span class="i18n-zh">南屿市档案馆 · 泽风计划（2024—2026）<br />调查记录保存在本机浏览器。</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026)<br />Investigation records stay in this browser.</span>
  </footer>
 
- <!-- 目录状态随本机阅览进度标注；顺序即阅览顺序。 -->
 </body>
 </html>

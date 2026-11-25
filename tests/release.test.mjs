@@ -1,27 +1,33 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,existsSync,readdirSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {game,resolveScenes} from './game-fixture.mjs';
 const legacy=(t,s)=>t.setState(t.ingestState({v:1,...s}));
-test('all six chapter boundaries, sequential access, preview ignored',()=>{
+test('all six release boundaries allow independent reading and ignore preview bypass',()=>{
  const {ctx,t,D,C}=game();C.previewMode=true;
  for(let day=1;day<=6;day++){
-  const first=D.steps.findIndex(s=>s.day===day);t.setState({stepUnlocked:first});
-  ctx.now=t.releaseTime(day)-1;assert.equal(t.isAccessible(first),false);t.complete(D.steps[first].id);assert.equal(t.getState().stepUnlocked,first);
+  const first=D.steps.findIndex(s=>s.day===day);t.setState({v:2,solved:{}});
+  ctx.now=t.releaseTime(day)-1;assert.equal(t.isAccessible(first),false);t.complete(D.steps[first].id);assert.equal(Object.keys(t.getState().solved).length,0);
   assert.equal(t.allEvidence().includes(D.steps[first].evidence[0]),false);
   ctx.now++;assert.equal(t.isAccessible(first),true);assert.equal(t.allEvidence().includes(D.steps[first].evidence[0]),true);
-  if(first+1<D.steps.length)assert.equal(t.isAccessible(first+1),false);
+  for(let i=first;i<D.steps.length&&D.steps[i].day===day;i++)assert.equal(t.isAccessible(i),true);
  }
 });
 test('invalid schedules fail closed; imported completion cannot reveal finale early',()=>{
- const {ctx,t,D,C}=game();ctx.now=Date.parse('2026-10-20T10:59:59Z');t.setState({stepUnlocked:D.steps.length,capstoneOk:true});assert.match(t.finaleBody(),/尚未解封/);
+ const {ctx,t,D,C}=game();ctx.now=Date.parse('2026-10-20T10:59:59Z');t.setState({v:1,stepUnlocked:D.steps.length,capstoneOk:true});assert.match(t.finaleBody(),/尚未解封/);
  C.launchAt='invalid';assert.equal(t.released(1),false);assert.doesNotThrow(()=>t.recordBody('registry'));
  C.launchAt='2026-10-20T19:00:00+08:00';for(const hours of [0,-1,NaN,Infinity,'24']){C.chapterIntervalHours=hours;assert.equal(t.released(1),false);}
 });
-test('all stages complete in dependency order; unavailable and repeated completions rejected',()=>{
+test('independent findings preserve sparse work; physical convergence and repeated completions remain guarded',async()=>{
  const g=game(),{ctx,t,D}=g;ctx.now=Date.parse('2026-10-26T00:00:00Z');
- for(let i=0;i<D.steps.length;i++){resolveScenes(g);t.complete(D.steps[(i+1)%D.steps.length].id);assert.equal(t.getState().stepUnlocked,i);t.complete(D.steps[i].id);assert.equal(t.getState().stepUnlocked,i+1);t.complete(D.steps[i].id);assert.equal(t.getState().stepUnlocked,i+1);}
- assert.equal(Object.keys(t.getState().solved).length,D.steps.length);
+ for(const id of ['judgment','masterkey','dropcoords']){assert.equal(t.complete(id),undefined);assert.equal(t.getState().solved[id],undefined);}
+ const order=D.steps.filter(s=>!['dropcoords','masterkey','judgment'].includes(s.id)).reverse();
+ for(const {id} of order){assert.ok(t.complete(id),id);const saved=t.encodeSave();assert.equal(t.complete(id),undefined);assert.equal(t.encodeSave(),saved);}
+ assert.equal(t.getState().stepUnlocked,12);assert.equal(t.canUnseal(),false);
+ const crypto=ctx.crypto;ctx.crypto={subtle:{digest:async(algorithm,input)=>{assert.equal(algorithm,'SHA-256');assert.equal(new TextDecoder().decode(input),'SYNTHETICRECEIPT');return Uint8Array.from(Buffer.from(g.C.pickup.sealSha256,'hex')).buffer;}}};
+ t.mutate(s=>s.receivedSeal='synthetic-receipt');t.maybeAutoSeal();await new Promise(resolve=>setImmediate(resolve));ctx.crypto=crypto;
+ assert.equal(t.getState().solved.dropcoords,true);assert.ok(t.complete('masterkey'));assert.equal(t.canInvestigate(D.steps.findIndex(s=>s.id==='judgment')),true);assert.ok(t.complete('judgment'));
+ assert.equal(Object.keys(t.getState().solved).length,D.steps.length);assert.equal(t.canUnseal(),true);
 });
 test('production configuration and public tree contain no GM kit',()=>{
  const {C}=game();assert.equal(C.previewMode,false);assert.equal(C.launchAt,'2026-10-20T19:00:00+08:00');assert.equal(existsSync(new URL('../gm',import.meta.url)),false);
@@ -92,15 +98,16 @@ test('tracks: beat stamps are a full scramble and beat order yields the key, vis
  assert.equal(byStamp,t.arcaeaTarget);
  assert.notEqual(colChar.join(''),t.arcaeaTarget,'visual left-to-right is scrambled');
 });
-const KEY='zephyr-zero-arg-v1';
+const KEY='zephyr-zero-arg-v2';
+const sparse=(D,n,extra={})=>({v:2,solved:Object.fromEntries(D.steps.slice(0,n).map(step=>[step.id,true])),...extra});
 const seed=(storage,s)=>storage.set(KEY,JSON.stringify({v:1,...s}));
 test('stale tab cannot overwrite a later replacement; retry adopts current state',()=>{
  const storage=new Map();seed(storage,{stepUnlocked:12,notes:'old'});
  const a=game({storage}),b=game({storage});
- assert.ok(b.t.mutate(s=>{s.stepUnlocked=14;s.receivedSeal='synthetic-receipt';}));
+ assert.ok(b.t.mutate(s=>{s.solved.audit=true;s.solved.hiddenindex=true;s.solved.reels=true;s.solved.newsclip=true;s.receivedSeal='synthetic-receipt';}));
  assert.equal(a.t.mutate(s=>{s.notes='stale';}),false);
- assert.equal(a.t.getState().stepUnlocked,14);
- assert.equal(JSON.parse(storage.get(KEY)).stepUnlocked,14);
+ assert.equal(a.t.getState().solved.newsclip,true);
+ assert.equal(JSON.parse(storage.get(KEY)).solved.newsclip,true);
  assert.equal(a.t.getRecovery()['notes-field'],'old');
  assert.ok(a.t.mutate(s=>{s.notes='reviewed';}));
  assert.equal(JSON.parse(storage.get(KEY)).receivedSeal,'synthetic-receipt');
@@ -167,84 +174,80 @@ test('equipment motion is disposable, cancellable and reduced-motion safe',()=>{
  assert.equal(calls[1].options.duration,160);assert.ok(calls[1].frames.every(frame=>!('transform' in frame)));assert.equal(cancelled,2);
  assert.doesNotThrow(()=>t.motion(null,[]));assert.doesNotThrow(()=>t.motion({},[]));assert.equal(t.encodeSave(),before);
 });
-test('waiting-file arrival keeps archive metadata, physical-pickup framing and save neutrality',()=>{
+test('optional participation preserves nonfiction pickup framing without an arrival ceremony',()=>{
  const {t,ctx}=game();ctx.now=Date.parse('2026-11-06');const before=t.encodeSave(),html=t.arrivalBody();
- assert.ok(html.includes('aria-hidden="true"'));assert.ok(html.includes('class="arrival-file" data-act="start-session"'));assert.ok(html.includes('线下实体二维码'));
- assert.ok(html.includes('第零号证人'));assert.ok(html.includes('WX-1946-011'));assert.ok(html.replace(/<[^>]+>/g,'').includes('无线电设备登记表（持有人栏缺失）'));assert.ok(!html.includes('receiver-art'));assert.equal(t.encodeSave(),before);
- t.setState({stepUnlocked:6,current:6,started:true});const save=t.encodeSave(),resume=t.arrivalBody();assert.ok(resume.includes('WX-1986-031'));assert.ok(resume.includes('继续调查'));
- ctx.document.documentElement={dataset:{lang:'en'}};const en=t.arrivalBody();assert.ok(en.includes('Witness Zero'));assert.ok(en.includes('Resume investigation'));assert.ok(en.includes('十三触点信号转盘图'));assert.equal(t.encodeSave(),save);
- assert.ok(t.activateFile('registry'));assert.ok(t.arrivalBody().includes('WX-1946-011'));
+ assert.match(html,/participation-view/);assert.match(html,/实体二维码/);assert.match(html,/确认前不要安排出行/);assert.doesNotMatch(html,/arrival-file|start-session|folder-status/);assert.equal(t.encodeSave(),before);
+ t.setState({v:1,stepUnlocked:6,current:6,started:true});const save=t.encodeSave();ctx.document.documentElement={dataset:{lang:'en'}};const en=t.arrivalBody();assert.match(en,/fictional archive/);assert.match(en,/online-only play cannot finish/);assert.match(en,/Do not arrange travel/);assert.equal(t.encodeSave(),save);
 });
-test('filing feedback is only armed after a new committed completion',()=>{
- const g=game(),{t,ctx}=g;ctx.now=Date.parse('2026-11-06');resolveScenes(g);t.activateFile('registry');t.complete('registry');assert.equal(t.getStation().justFiled,'registry');assert.equal(t.getState().stepUnlocked,1);
+test('completion stays on its original without arming ornamental filing motion',()=>{
+ const g=game(),{t,ctx}=g;ctx.now=Date.parse('2026-11-06');resolveScenes(g);t.activateFile('registry');t.complete('registry');assert.equal(t.getStation().justFiled,null);assert.equal(t.getStation().mode,'original');assert.equal(t.getState().stepUnlocked,1);
  t.getStation().justFiled=null;t.complete('registry');assert.equal(t.getStation().justFiled,null);t.complete('dial');assert.equal(t.getStation().justFiled,null);
 });
-test('station retains every combined tracks and judgment source segment across modes',()=>{
- const {t,D,ctx}=game();ctx.now=Date.parse('2026-11-06');t.setState({stepUnlocked:20});
+test('station retains every combined tracks and judgment source segment across modes',async()=>{
+ const g=game(),{t,D,ctx}=g;ctx.now=Date.parse('2026-11-06');t.setState(sparse(D,20));const crypto=ctx.crypto;ctx.crypto={subtle:{digest:async(algorithm,input)=>{assert.equal(algorithm,'SHA-256');assert.equal(new TextDecoder().decode(input),'SYNTHETICRECEIPT');return Uint8Array.from(Buffer.from(g.C.pickup.sealSha256,'hex')).buffer;}}};t.mutate(s=>s.receivedSeal='synthetic-receipt');t.maybeAutoSeal();await new Promise(resolve=>setImmediate(resolve));ctx.crypto=crypto;
  for(const id of ['tracks','judgment']){const s=D.steps.find(s=>s.id===id),all=t.renderMaterial(s),operate=t.operateBody(s),original=t.originalBody(s);assert.ok(operate.length>0);assert.ok(original.length>0);const split=all.indexOf(id==='tracks'?'<div class="terminal-block">':'<div class="dossier-list');assert.ok(split>0);assert.ok((operate+original).includes(all.slice(0,split)));assert.ok((operate+original).includes(all.slice(split)));}
 });
 test('completed instrument review is isolated and stale widget owners are rejected',()=>{
- const {t,ctx}=game();ctx.now=Date.parse('2026-11-06');t.setState({stepUnlocked:8,maiTapped:[2]});t.activateFile('dial');t.setMode('operate');const before=t.encodeSave();
+ const {t,ctx}=game();ctx.now=Date.parse('2026-11-06');t.setState({v:1,stepUnlocked:8,maiTapped:[2]});t.activateFile('dial');t.setMode('operate');const before=t.encodeSave();
  assert.ok(t.widgetChange('maimai','dial',s=>s.maiTapped.push(3)));assert.equal(t.encodeSave(),before);assert.deepEqual(Array.from(t.getStation().review.maiTapped),[2,3]);
  assert.equal(t.widgetChange('wave','reels',s=>s.waveA=1),false);
 });
-test('adopting an earlier save removes newly inaccessible pinned originals',()=>{
- const storage=new Map(),{t,ctx,listeners}=game({storage});ctx.now=Date.parse('2026-11-06');t.mutate(s=>{s.stepUnlocked=18;});const id=ctx.window.ZephyrUI.getModel().evidence.at(-1).id;assert.ok(t.pinEvidence(id));seed(storage,{stepUnlocked:0});listeners.storage({key:KEY});assert.ok(!ctx.window.ZephyrUI.getModel().pins.includes(id));
+test('replacement removes lost earned exhibits while public original pins remain readable',()=>{
+ const storage=new Map(),{t,ctx,listeners}=game({storage});ctx.now=Date.parse('2026-11-06');t.mutate(s=>{s.solved.registry=true;});assert.ok(t.pinEvidence('nCorrection'));assert.ok(t.pinEvidence('aRegistry',true));seed(storage,{stepUnlocked:0});listeners.storage({key:KEY});assert.ok(!ctx.window.ZephyrUI.getModel().pins.includes('nCorrection'));assert.ok(ctx.window.ZephyrUI.getModel().pins.includes('aRegistry'));
 });
 test('evidence cabinet groups only existing attachments and searches open metadata',()=>{
- const {t,ctx,D}=game();ctx.now=Date.parse('2026-11-06');t.setState({stepUnlocked:6});t.activateFile('dial');const before=t.encodeSave(),groups=t.evidenceGroups();
+ const {t,ctx,D}=game();ctx.now=Date.parse('2026-11-06');t.setState({v:1,stepUnlocked:6});t.activateFile('dial');const before=t.encodeSave(),groups=t.evidenceGroups();
  assert.deepEqual(Array.from(groups[0].ids),Array.from(D.steps.find(s=>s.id==='dial').evidence));
  assert.equal(new Set(groups.slice(0,2).flatMap(g=>Array.from(g.ids))).size,t.allEvidence().length);
  assert.equal(new Set(groups.flatMap(g=>Array.from(g.ids))).size,t.availableMaterials().length);
- assert.ok(t.evidenceMatches('aWorkbook','维修台'));assert.ok(t.evidenceMatches('aWorkbook','１９４６'));assert.equal(t.evidenceMatches('aWorkbook','not present in metadata'),false);assert.equal(t.evidenceMatches('aTrace',''),false);
+ assert.ok(t.evidenceMatches('aWorkbook','维修台'));assert.ok(t.evidenceMatches('aWorkbook','１９４６'));assert.equal(t.evidenceMatches('aWorkbook','not present in metadata'),false);assert.equal(t.evidenceMatches('aTrace',''),true);assert.equal(t.evidenceMatches('aVerdict',''),false);
  const id='aWorkbook',saved=D.records[id].body;D.records[id].body='synthetic body-only marker';assert.equal(t.evidenceMatches(id,'synthetic body-only marker'),false);D.records[id].body=saved;
  assert.ok(t.evidencePicker().includes('id="evidence-search"'));assert.ok(t.evidenceBody(id).includes('original-evidence'));assert.ok(t.evidenceBody(id).includes(saved.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')));
- assert.ok(!t.evidencePicker().includes('data-evidence-id="aTrace"'));assert.equal(t.encodeSave(),before);
+ assert.ok(t.evidencePicker().includes('data-evidence-id="aTrace"'));assert.ok(!t.evidencePicker().includes('data-evidence-id="aVerdict"'));assert.equal(t.encodeSave(),before);
 });
 test('canonical workbook and robots discovery match available evidence',()=>{
  const {D}=game();assert.equal(readFileSync(new URL('../evidence/1946-workbook.txt',import.meta.url),'utf8'),D.records.aWorkbook.body);
  const robots=readFileSync(new URL('../robots.txt',import.meta.url),'utf8');for(const file of ['1986-reel-a.wav','1986-reel-b.wav'])assert.ok(robots.includes('/evidence/'+file));
 });
-test('presentation snapshot is immutable metadata and preserves canonical chapter grouping',()=>{
- const {ctx,t}=game();ctx.now=Date.parse('2026-11-06');
+test('presentation snapshot is immutable metadata without a frontier or completion dashboard',()=>{
+ const {ctx,t,D}=game();ctx.now=Date.parse('2026-11-06');
  const api=ctx.window.ZephyrUI,before=t.encodeSave(),model=api.getModel();
- assert.deepEqual(Array.from(model.chapters,c=>c.total),[2,4,4,4,4,2]);
- assert.equal(model.files.length,20);assert.equal(model.completed,0);
- assert.equal(model.files[0].status,'available');assert.equal(model.files[1].status,'locked');
+ assert.deepEqual(Array.from(model.files,f=>f.id),Array.from(D.steps,s=>s.id));assert.equal(model.files.length,20);
+ for(const name of ['chapters','completed','frontier','percent'])assert.equal(Object.hasOwn(model,name),false);
+ assert.equal(model.files[0].accessible,true);assert.equal(model.files[1].accessible,true);assert.equal(Object.hasOwn(model.files[0],'status'),false);
  assert.equal(t.encodeSave(),before,'metadata reads cannot mutate current/save');
- assert.ok(Object.isFrozen(model));assert.ok(Object.isFrozen(model.files[0]));
- assert.ok(model.evidence.length>0);
+ assert.ok(Object.isFrozen(model));assert.ok(Object.isFrozen(model.files[0]));assert.ok(model.evidence.length>0);
  for(const name of ['body','receivedSeal','acceptedHash','notes','clue','answer'])assert.ok(!JSON.stringify(model).includes('"'+name+'":'));
- t.setState({stepUnlocked:6,current:0});const advanced=api.getModel();assert.equal(advanced.completed,6);assert.equal(advanced.files[0].status,'completed');assert.equal(advanced.files[6].status,'available');
- ctx.now=t.releaseTime(3)-1;assert.equal(api.getModel().files[6].status,'scheduled');
+ t.setState(sparse(D,6,{current:0}));const advanced=api.getModel();assert.equal(advanced.files[0].accessible,true);assert.equal(advanced.files[6].accessible,true);
+ ctx.now=t.releaseTime(3)-1;assert.equal(api.getModel().files[6].accessible,false);
 });
  test('presentation actions reject forged file/evidence navigation and unsupported panels',()=>{
  const {ctx,t}=game();ctx.now=Date.parse('2026-11-06');const api=ctx.window.ZephyrUI,before=t.encodeSave();
- assert.equal(api.navigate('judgment'),false);assert.equal(api.navigate('not-a-file'),false);
+ ctx.now=t.releaseTime(6)-1;assert.equal(api.navigate('judgment'),false);ctx.now=Date.parse('2026-11-06');assert.equal(api.navigate('judgment'),true);assert.equal(t.canInvestigate(19),false);assert.equal(api.navigate('not-a-file'),false);
  assert.equal(api.openPanel('evidence','not-an-evidence'),false);assert.equal(api.openPanel('unknown'),false);
  assert.equal(t.encodeSave(),before);
 });
  test('presentation subscriptions observe committed state, replacement, language and audio',()=>{
  const storage=new Map(),{ctx,t,listeners}=game({storage});ctx.now=Date.parse('2026-11-06');const api=ctx.window.ZephyrUI,models=[];
- const off=api.subscribe(m=>models.push(m));assert.ok(t.mutate(s=>{s.stepUnlocked=4;}));assert.equal(models.at(-1).completed,4);
- seed(storage,{stepUnlocked:2});listeners.storage({key:KEY});assert.equal(models.at(-1).completed,2);
+ const off=api.subscribe(m=>models.push(m));const before=models.length;assert.ok(t.mutate(s=>{s.solved.reels=true;}));assert.ok(models.length>before);assert.ok(models.at(-1).evidence.some(m=>m.id==='aDrop'));
+ seed(storage,{stepUnlocked:0});listeners.storage({key:KEY});assert.ok(!models.at(-1).evidence.some(m=>m.id==='aDrop'));
  ctx.document.documentElement={dataset:{lang:'en'}};ctx.document.querySelector=()=>null;
  listeners['zephyr-language-change']();assert.equal(models.at(-1).locale,'en');
  const prev=models.at(-1).audioMuted;api.toggleSound();assert.notEqual(models.at(-1).audioMuted,prev);
  off();const count=models.length;api.toggleSound();assert.equal(models.length,count);
 });
 test('foreground return refreshes an elapsed release before replacing its timer',()=>{
- const {ctx,t,elements,listeners}=game();ctx.clearTimeout=()=>{};
+ const {ctx,t,listeners}=game();ctx.clearTimeout=()=>{};
  ctx.now=t.releaseTime(1)-1;t.activateFile('registry',true);ctx.window.ZephyrUI.toggleSound();
  // First publish the pre-release status, then return after the release boundary.
- listeners.focus();let rendered='';elements.reader={dataset:{},contains:()=>false,querySelector:()=>null,querySelectorAll:()=>[],set innerHTML(value){rendered=value;}};
+ const models=[];ctx.window.ZephyrUI.subscribe(model=>models.push(model));listeners.focus();assert.equal(models.at(-1).files[0].accessible,false);
  ctx.now=t.releaseTime(1)+1;ctx.document.visibilityState='visible';listeners.visibilitychange();
- assert.match(rendered,/arrival-view/);assert.doesNotMatch(t.recordBody('registry'),/not yet due for release/);
- assert.equal(ctx.window.ZephyrUI.getModel().files[0].status,'available');
+ assert.equal(models.at(-1).files[0].accessible,true);assert.doesNotMatch(t.recordBody('registry'),/not yet due for release/);
+ assert.equal(ctx.window.ZephyrUI.getModel().files[0].accessible,true);
 });
  test('presentation observer errors cannot block saves or other subscribers',()=>{
  const {ctx,t}=game();let observed;ctx.window.ZephyrUI.subscribe(()=>{throw Error('synthetic observer failure');});ctx.window.ZephyrUI.subscribe(m=>{observed=m;});
- assert.ok(t.mutate(s=>{s.notes='synthetic note';}));assert.equal(t.getState().notes,'synthetic note');assert.equal(observed.completed,0);
+ assert.ok(t.mutate(s=>{s.notes='synthetic note';}));assert.equal(t.getState().notes,'synthetic note');assert.ok(Object.isFrozen(observed));assert.equal(observed.currentId,'registry');
 });
  test('game shell loads its semantic presentation controller and keeps modal boundaries',()=>{
  const h=readFileSync(new URL('../index.html',import.meta.url),'utf8');

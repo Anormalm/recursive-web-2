@@ -1,9 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {game,resolveScenes} from './game-fixture.mjs';
-const KEY='zephyr-zero-arg-v1',now=Date.parse('2026-11-20');
+const KEY='zephyr-zero-arg-v2',now=Date.parse('2026-11-20');
 const setup=options=>game({now,...options});
-const advance=(g,n)=>{resolveScenes(g);while(g.t.getState().stepUnlocked<n){g.t.complete(g.D.steps[g.t.getState().stepUnlocked].id);resolveScenes(g);}};
+// Setup only: explicit finding membership, not a progression loop or QR authority.
+const advance=(g,n)=>{assert.ok(g.t.mutate(s=>{s.solved=Object.fromEntries(g.D.steps.slice(0,n).map(step=>[step.id,true]));}));resolveScenes(g);};
+const verifyReceipt=async g=>{const crypto=g.ctx.crypto;g.ctx.crypto={subtle:{digest:async(algorithm,input)=>{assert.equal(algorithm,'SHA-256');assert.equal(new TextDecoder().decode(input),'SYNTHETICRECEIPT');return bytes(g.C.pickup.sealSha256);}}};assert.ok(g.t.mutate(s=>s.receivedSeal='synthetic-receipt'));g.t.maybeAutoSeal();await new Promise(resolve=>setImmediate(resolve));g.ctx.crypto=crypto;assert.equal(g.t.physicalReady(g.t.getState()),true);};
 const bytes=hash=>Uint8Array.from(Buffer.from(hash,'hex')).buffer;
 const deferred=()=>{const jobs=[];return {jobs,crypto:{subtle:{digest:()=>new Promise((resolve,reject)=>jobs.push({resolve,reject}))}}};};
 const scopeFor=(selectors={},lists={})=>({querySelector:s=>selectors[s]||null,querySelectorAll:s=>lists[s]||[]});
@@ -13,7 +15,7 @@ const encode=obj=>Buffer.from(JSON.stringify(obj)).toString('base64url');
 
 test('actual import handler rejects malformed input and cancelled confirmation without changes',async()=>{
  const g=setup();g.t.mutate(s=>s.notes='original');const before=g.t.encodeSave(),run=imported(g);g.elements['save-import']={value:'invalid'};
- await run();assert.equal(g.t.encodeSave(),before);assert.match(g.toasts.at(-1),/格式无效/);
+ await run();assert.equal(g.t.encodeSave(),before);assert.match(g.toasts.at(-1),/存档格式不对/);
  g.elements['save-import'].value=encode({v:1,stepUnlocked:4,notes:'replacement'});g.ctx.window.confirm=()=>false;await run();assert.equal(g.t.encodeSave(),before);
 });
 test('actual import adopts legacy work but refuses confirmation raced by another replacement',async()=>{
@@ -59,7 +61,7 @@ test('queued release callbacks refresh availability and replace the previous tim
 });
 test('rejected typed digest produces recoverable feedback instead of a rejected handler',async()=>{
  let calls=0;const g=setup({crypto:{subtle:{digest:()=>++calls===1?Promise.resolve(new ArrayBuffer(32)):Promise.reject(Error('crypto failed'))}}});resolveScenes(g);g.t.activateFile('registry');
- await assert.doesNotReject(g.t.submitInput('synthetic input'));assert.equal(g.t.getState().stepUnlocked,0);assert.match(g.t.dockBody(g.D.steps[0]),/校验暂不可用/);
+ await assert.doesNotReject(g.t.submitInput('synthetic input'));assert.equal(g.t.getState().stepUnlocked,0);assert.match(g.t.recordBody('registry'),/校验暂时不可用/);
 });
 test('a later typed submission supersedes a pending earlier result',async()=>{
  const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));resolveScenes(g);g.t.activateFile('registry');
@@ -71,14 +73,14 @@ test('editing a typed input invalidates its pending result without changing save
  const work=g.t.submitInput(field.value);field.value='changed input';field.handlers.input();d.jobs[0].resolve(bytes(g.t.acceptedHash.registry));await work;assert.equal(g.t.getState().stepUnlocked,0);
 });
 test('actual capstone submit fails closed on rejected digest and ignores replaced state',async()=>{
- const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,20);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));
- const work=form.handlers.submit({preventDefault(){}});d.jobs[0].reject(Error('crypto failed'));await assert.doesNotReject(work);assert.equal(g.t.getState().capstoneOk,false);assert.match(g.t.finaleBody(),/校验暂不可用/);
+ const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,20);await verifyReceipt(g);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));
+ const work=form.handlers.submit({preventDefault(){}});d.jobs[0].reject(Error('crypto failed'));await assert.doesNotReject(work);assert.equal(g.t.getState().capstoneOk,false);assert.match(g.t.finaleBody(),/校验暂时不可用/);
  const later=form.handlers.submit({preventDefault(){}});g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:0}));d.jobs[1].resolve(bytes(g.t.finaleCapstoneHash));await later;assert.equal(g.t.getState().capstoneOk,false);assert.equal(g.t.getState().stepUnlocked,0);
 });
 test('unavailable crypto fails closed for typed, wave and capstone checks',async()=>{
- const g=setup({crypto:undefined});resolveScenes(g);g.t.activateFile('registry');await g.t.submitInput('synthetic input');assert.equal(g.t.getState().stepUnlocked,0);assert.match(g.t.dockBody(g.D.steps[0]),/校验暂不可用/);
- advance(g,5);g.t.activateFile('reels');const a=0,b=g.t.bWaves.findIndex(row=>row.every((v,i)=>v===g.t.aWaves[a][i]));g.t.mutate(s=>{s.waveA=a;s.waveB=b<0?0:b;});await g.t.verifyWave();assert.equal(g.t.getState().stepUnlocked,5);assert.match(g.t.dockBody(g.D.steps[5]),/校验暂不可用/);
- advance(g,20);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));await form.handlers.submit({preventDefault(){}});assert.equal(g.t.getState().capstoneOk,false);assert.match(g.t.finaleBody(),/校验暂不可用/);
+ const g=setup({crypto:undefined});resolveScenes(g);g.t.activateFile('registry');await g.t.submitInput('synthetic input');assert.equal(g.t.getState().stepUnlocked,0);assert.match(g.t.recordBody('registry'),/校验暂时不可用/);
+ advance(g,5);g.t.activateFile('reels');assert.ok(g.t.setMode('operate'));const a=0,b=g.t.bWaves.findIndex(row=>row.every((v,i)=>v===g.t.aWaves[a][i]));g.t.mutate(s=>{s.waveA=a;s.waveB=b<0?0:b;});await g.t.verifyWave();assert.equal(g.t.getState().stepUnlocked,5);assert.match(g.t.recordBody('reels'),/校验暂时不可用/);
+ advance(g,20);await verifyReceipt(g);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));await form.handlers.submit({preventDefault(){}});assert.equal(g.t.getState().capstoneOk,false);assert.match(g.t.finaleBody(),/校验暂时不可用/);
 });
 test('wave digest rejection and changed selections cannot apply a pending match',async()=>{
  const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,5);g.t.activateFile('reels');const a=g.t.aWaves.findIndex(row=>g.t.bWaves.some(other=>row.every((v,i)=>v===other[i]))),b=g.t.bWaves.findIndex(row=>row.every((v,i)=>v===g.t.aWaves[a][i]));g.t.mutate(s=>{s.waveA=a;s.waveB=b;});
@@ -86,21 +88,21 @@ test('wave digest rejection and changed selections cannot apply a pending match'
  const late=g.t.verifyWave();g.t.mutate(s=>s.waveB=(b+1)%12);d.jobs[2].resolve(new ArrayBuffer(32));d.jobs[3].resolve(new ArrayBuffer(32));await late;assert.equal(g.t.getState().stepUnlocked,5);
 });
 test('QR crypto failure retains the saved receipt and never advances',async()=>{
- const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,12);g.t.activateFile('dropcoords');g.t.mutate(s=>s.receivedSeal='synthetic-receipt');g.t.maybeAutoSeal();d.jobs[0].reject(Error('digest failed'));await new Promise(resolve=>setImmediate(resolve));assert.equal(g.t.getState().stepUnlocked,12);assert.equal(g.t.getState().receivedSeal,'synthetic-receipt');assert.match(g.t.dockBody(g.D.steps[12]),/校验暂不可用/);
+ const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,12);g.t.activateFile('dropcoords');g.t.mutate(s=>s.receivedSeal='synthetic-receipt');g.t.maybeAutoSeal();d.jobs[0].reject(Error('digest failed'));await new Promise(resolve=>setImmediate(resolve));assert.equal(g.t.getState().stepUnlocked,12);assert.equal(g.t.getState().receivedSeal,'synthetic-receipt');assert.match(g.t.recordBody('dropcoords'),/校验暂时不可用/);
 });
 test('capstone input edit and repeated submission supersede pending results',async()=>{
- const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,20);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));
+ const d=deferred(),g=setup({crypto:d.crypto});d.jobs.shift().resolve(new ArrayBuffer(32));advance(g,20);await verifyReceipt(g);const form=control({}),field=control({});field.value='synthetic phrase';g.t.wire(scopeFor({'#capstone-form':form,'#capstone-input':field}));
  const old=form.handlers.submit({preventDefault(){}});field.value='edited';field.handlers.input();d.jobs[0].resolve(bytes(g.t.finaleCapstoneHash));await old;assert.equal(g.t.getState().capstoneOk,false);
  const first=form.handlers.submit({preventDefault(){}}),second=form.handlers.submit({preventDefault(){}});d.jobs[2].resolve(new ArrayBuffer(32));await second;d.jobs[1].resolve(bytes(g.t.finaleCapstoneHash));await first;assert.equal(g.t.getState().capstoneOk,false);
- const accepted=form.handlers.submit({preventDefault(){}});d.jobs[3].resolve(bytes(g.t.finaleCapstoneHash));await accepted;assert.equal(g.t.getState().capstoneOk,true);assert.equal(g.t.pendingScene().id,'c6-handover');
+ const accepted=form.handlers.submit({preventDefault(){}});d.jobs[3].resolve(bytes(g.t.finaleCapstoneHash));await accepted;assert.equal(g.t.getState().capstoneOk,true);assert.equal(g.t.pendingScene(),null);assert.equal(g.t.campaignClosed(),true);assert.match(g.t.finaleView(),/story-epilogue/);
 });
 test('readback with a genuinely different save adopts it and keeps previous notes recoverable',()=>{
  const faults={},g=setup({faults});g.t.mutate(s=>s.notes='old page');let replacement=false;faults.write=(key)=>{if(key===KEY){g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:2,notes:'other save'}));replacement=true;}return false;};faults.readValue=(key,value)=>replacement&&key===KEY?JSON.stringify({v:1,stepUnlocked:2,notes:'other save'}):value;
  assert.equal(g.t.mutate(s=>s.notes='attempted edit'),false);assert.equal(g.t.getState().notes,'other save');assert.equal(g.t.getRecovery()['notes-field'],'attempted edit');
 });
 test('existing validation feedback follows language changes without saving',async()=>{
- const g=setup();resolveScenes(g);g.t.activateFile('registry');await g.t.submitInput('synthetic rejection');const saved=g.t.encodeSave();assert.match(g.t.dockBody(g.D.steps[0]),/校验失败/);g.ctx.document.documentElement={dataset:{lang:'en'}};g.listeners['zephyr-language-change']();assert.match(g.t.dockBody(g.D.steps[0]),/VERIFY FAILED/);assert.equal(g.t.encodeSave(),saved);
- advance(g,19);g.t.activateFile('judgment');g.t.submitVerdict();assert.match(g.t.dockBody(g.D.steps[19]),/Some claims/);g.ctx.document.documentElement.dataset.lang='zh';g.listeners['zephyr-language-change']();assert.match(g.t.dockBody(g.D.steps[19]),/尚有未完成/);
+ const g=setup();resolveScenes(g);g.t.activateFile('registry');await g.t.submitInput('synthetic rejection');const saved=g.t.encodeSave();assert.match(g.t.recordBody('registry'),/校验失败/);g.ctx.document.documentElement={dataset:{lang:'en'}};g.listeners['zephyr-language-change']();assert.match(g.t.recordBody('registry'),/VERIFY FAILED/);assert.equal(g.t.encodeSave(),saved);
+ advance(g,19);await verifyReceipt(g);g.t.activateFile('judgment');assert.ok(g.t.setMode('operate'));g.t.submitVerdict();assert.match(g.t.recordBody('judgment'),/Some claims/);g.ctx.document.documentElement.dataset.lang='zh';g.listeners['zephyr-language-change']();assert.match(g.t.recordBody('judgment'),/尚有未完成/);
 });
 test('modal wrap ignores controls inside closed disclosures even when they have layout boxes',()=>{
  const g=setup();let focused='',prevented=0;const details={open:false,querySelector:()=>summary,parentElement:null,matches:selector=>selector==='details:not([open])'&&!details.open};
@@ -113,12 +115,12 @@ test('actual parity rejection and stale owner cannot change progress',async()=>{
  const g=setup();advance(g,8);g.t.activateFile('parity');const button=control({act:'check-hamming'});g.t.wire(scopeFor({}, {'[data-act]':[button]}));await button.handlers.click({detail:0});assert.equal(g.t.getState().stepUnlocked,8);
  g.t.activateFile('registry');await button.handlers.click({detail:0});assert.equal(g.t.getState().stepUnlocked,8);
 });
-test('external replacement recovers a hidden frontier draft without merging it into the save',()=>{
+test('external replacement recovers a hidden file draft without merging it into the save',()=>{
  const g=setup({storage:new Map([[KEY,JSON.stringify({v:1,stepUnlocked:1})]])});g.t.activateFile('institution');
- g.elements['answer-input']={value:'frontier reasoning',selectionStart:0,selectionEnd:0};assert.ok(g.t.activateFile('registry'));delete g.elements['answer-input'];
+ g.elements['answer-input']={value:'file reasoning',selectionStart:0,selectionEnd:0};assert.ok(g.t.activateFile('registry'));delete g.elements['answer-input'];
  g.storage.set(KEY,JSON.stringify({v:1,stepUnlocked:0,notes:'replacement'}));assert.equal(g.t.syncState(),false);
- assert.equal(g.t.getRecovery()['answer-input:institution'],'frontier reasoning');assert.equal(Object.keys(g.t.getStation().drafts).length,0);
- const exported=g.t.decodeSave(g.t.encodeSave());assert.equal(exported.stepUnlocked,0);assert.equal(exported.notes,'replacement');assert.ok(!JSON.stringify(exported).includes('frontier reasoning'));
+ assert.equal(g.t.getRecovery()['answer-input:institution'],'file reasoning');assert.equal(Object.keys(g.t.getStation().drafts).length,0);
+ const exported=g.t.decodeSave(g.t.encodeSave());assert.equal(exported.stepUnlocked,0);assert.equal(exported.notes,'replacement');assert.ok(!JSON.stringify(exported).includes('file reasoning'));
 });
 test('import recovers multiple file drafts separately and reset clears recovery',async()=>{
  const g=setup({storage:new Map([[KEY,JSON.stringify({v:1,stepUnlocked:4})]])});
@@ -137,8 +139,8 @@ test('later replacements keep unrelated recovered file drafts',()=>{
  assert.equal(g.t.getRecovery()['answer-input:registry'],'first working text');assert.equal(g.t.getRecovery()['answer-input:institution'],'second working text');
 });
 test('stale and missing-choice story feedback translate without committing or saving',()=>{
- for(const missing of [false,true]){const g=setup();if(missing)advance(g,1);if(missing){g.t.complete('institution');}g.t.activateFile(missing?'institution':'registry');
- const scene=g.t.pendingScene(),button=control({scene:scene.id,epoch:String(g.t.getEpoch())});g.t.wire(scopeFor({}, {'[data-scene][data-act="commit-story"]':[button]}));if(!missing)g.t.mutate(s=>s.notes='change after paint');
+ for(const missing of [false,true]){const g=setup();g.t.complete('registry');g.t.complete('institution');g.t.activateFile('institution');
+ const scene=g.t.pendingScene();assert.ok(g.t.reviewStory(scene.id));const button=control({scene:scene.id,epoch:String(g.t.getEpoch())});g.t.wire(scopeFor({}, {'[data-scene][data-act="commit-story"]':[button]}));if(!missing){g.t.getStation().storyDrafts[scene.id]={option:'held'};g.t.mutate(s=>s.notes='change after paint');}
  button.handlers.click();const saved=g.t.encodeSave();assert.match(g.t.storyDock(scene),missing?/请先选一项/:/记录已变/);g.ctx.document.documentElement={dataset:{lang:'en'}};g.listeners['zephyr-language-change']();
  assert.match(g.t.storyDock(scene),missing?/Choose an option first/:/The record changed/);assert.equal(g.t.encodeSave(),saved);assert.equal(g.t.getState().story.records[scene.id],undefined);}
 });

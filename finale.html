@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
-  <meta name="theme-color" content="#2b2014" />
+  <meta name="theme-color" content="#FAFAF7" />
   <meta name="robots" content="noindex" />
   <title data-en="Closing Report Z-00 · Project Zephyr">结案报告 Z-00 · 泽风计划</title>
   <link rel="stylesheet" href="styles.css" />
@@ -14,16 +14,21 @@
   <script defer src="js/i18n.js"></script>
   <script defer src="js/story.js"></script>
   <script defer src="js/task-guidance.js"></script>
+  <script defer src="js/archive-topology.js"></script>
   <script defer src="js/engine.js"></script>
   <script defer src="js/game-ui.js"></script>
-  <!-- 转录备注 018：这一页不是给所有人的。它只给把二十卷都读完的人。 -->
 </head>
 <body class="companion-page finale-page station-page">
  <header class="top station-top">
-  <a class="station-brand" href="index.html">ZEPHYR</a>
+  <a class="station-brand" href="index.html">Z-00</a>
+  <nav class="archive-nav" aria-label="页面导航 / Page navigation">
+   <a href="index.html"><span class="i18n-zh">阅览</span><span class="i18n-en">Reading</span></a>
+   <a href="catalog.html"><span class="i18n-zh">目录</span><span class="i18n-en">Catalog</span></a>
+   <a href="log.html"><span class="i18n-zh">工作记录</span><span class="i18n-en">Staff notes</span></a>
+  </nav>
   <div class="station-utilities">
    <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
-   <button id="session-menu" class="btn" data-act="panel" data-panel="menu"><span class="i18n-zh">菜单</span><span class="i18n-en">Menu</span></button>
+   <button id="session-menu" class="btn" data-act="panel" data-panel="menu"><span class="i18n-zh">工具</span><span class="i18n-en">Tools</span></button>
   </div>
  </header>
  <main>
@@ -37,11 +42,11 @@
  </main>
  <div id="backdrop"></div>
  <aside id="drawer" aria-labelledby="drawer-title" aria-hidden="true" inert>
-  <div class="drawer-head"><span id="drawer-title">菜单</span><button class="drawer-close" id="drawer-close" aria-label="关闭 / Close">×</button></div>
+  <div class="drawer-head"><span id="drawer-title">工具</span><button class="drawer-close" id="drawer-close" aria-label="关闭 / Close">×</button></div>
   <div id="drawer-body"></div>
  </aside>
  <footer>
-  <span class="i18n-zh">南屿市档案馆 版权所有 · 泽风计划（2024—2026）<br />调查记录保存在本机浏览器。</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026)<br />Investigation progress stays in this browser.</span>
+  <span class="i18n-zh">南屿市档案馆 版权所有 · 泽风计划（2024—2026）<br />调查记录保存在本机浏览器。</span><span class="i18n-en">Nanyu Municipal Archives · Project Zephyr (2024–2026)<br />Investigation records stay in this browser.</span>
  </footer>
 </body>
 </html>

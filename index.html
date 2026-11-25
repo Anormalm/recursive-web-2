@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>var lang=new URLSearchParams(location.search).get('lang');try{if(lang!=='zh'&&lang!=='en')lang=localStorage.getItem('zephyr-lang')}catch(e){}if(lang==='en')document.documentElement.dataset.lang='en';</script>
-  <meta name="theme-color" content="#253A35" />
+  <meta name="theme-color" content="#FAFAF7" />
   <meta name="description" content="南屿市档案馆 · 泽风计划：历史无线电维护档案数字化项目。在线阅览与修复校验。" data-en="Nanyu Municipal Archives · Project Zephyr: digitized historic radio maintenance archives. Online reading and verification." />
   <title data-en="PROJECT ZEPHYR · Online Reading — Nanyu Municipal Archives">泽风计划 · 在线阅览 — 南屿市档案馆</title>
   <link rel="stylesheet" href="styles.css" />
@@ -14,6 +14,7 @@
   <script defer src="js/i18n.js"></script>
   <script defer src="js/story.js"></script>
   <script defer src="js/task-guidance.js"></script>
+  <script defer src="js/archive-topology.js"></script>
   <script defer src="js/engine.js"></script>
   <script defer src="js/game-ui.js"></script>
   <!-- 转录备注 004：本页在恢复时缺少签发栏。签发人身份未确立。 -->
@@ -24,11 +25,15 @@
  <!-- 恢复日志 · 残片三：原始登记只覆盖设备。任何人员条目均为后期补录。 -->
 
  <header class="top station-top">
-  <a class="station-brand" href="index.html">ZEPHYR</a>
-  <div id="station-identity" class="station-identity"></div>
+  <a class="station-brand" href="index.html">Z-00</a>
+  <nav class="archive-nav" aria-label="页面导航 / Page navigation">
+   <a href="index.html" aria-current="page"><span class="i18n-zh">阅览</span><span class="i18n-en">Reading</span></a>
+   <a href="catalog.html"><span class="i18n-zh">目录</span><span class="i18n-en">Catalog</span></a>
+   <a href="log.html"><span class="i18n-zh">工作记录</span><span class="i18n-en">Staff notes</span></a>
+  </nav>
   <div class="station-utilities">
    <button class="lang-toggle" data-lang-toggle aria-label="Switch language">EN</button>
-   <button id="session-menu" class="btn" data-act="panel" data-panel="menu"><span class="i18n-zh">菜单</span><span class="i18n-en">Menu</span></button>
+   <button id="session-menu" class="btn" data-act="panel" data-panel="menu"><span class="i18n-zh">工具</span><span class="i18n-en">Tools</span></button>
   </div>
  </header>
  <main>
